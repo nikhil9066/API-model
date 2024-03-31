@@ -19,7 +19,6 @@ fiona==1.9.5
 Flask==3.0.0
 folium==0.15.0
 fonttools==4.43.1
-GDAL==3.7.3
 geopandas==0.14.0
 googlemaps==4.10.0
 idna==3.4
