@@ -33,6 +33,9 @@ jobs:
         pip install -r requirements.txt
         pip install pytest  # Install pytest
 
+    - name: List files in directory
+      run: ls -R
+
     - name: Run tests
       run: |
         pytest
