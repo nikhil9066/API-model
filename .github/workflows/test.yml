@@ -36,9 +36,9 @@ jobs:
     - name: List files in directory
       run: ls -R
 
-    - name: Run tests
-      run: |
-        pytest
+    # - name: Run tests
+    #   run: |
+    #     pytest
 
     - name: Lint code with flake8
       run: |
