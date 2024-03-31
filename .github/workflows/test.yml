@@ -32,6 +32,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install pytest  # Install pytest
+        pip install flake8  # Install flake8
 
     - name: List files in directory
       run: ls -R
