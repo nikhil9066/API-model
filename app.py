@@ -11,6 +11,7 @@ csv_file_path = os.path.join('cred', 'users.csv')
 
 app = Flask(__name__)
 
+
 @app.route('/')
 def index():
     return render_template('login.html')
