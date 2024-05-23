@@ -1,5 +1,24 @@
 import ipp
 
+# Function to segregate skewness values
+def segregate_skewness(skewness_values):
+    approx_symmetry = skewness_values[(skewness_values >= -0.5) & (skewness_values <= 0.5)].index.tolist()
+    slightly_skewed = skewness_values[((skewness_values >= -1) & (skewness_values < -0.5)) | 
+                                      ((skewness_values > 0.5) & (skewness_values <= 1))].index.tolist()
+    highly_skewed = skewness_values[(skewness_values < -1) | (skewness_values > 1)].index.tolist()
+    
+    # Print the results
+    print("For skewness values between -0.5 and 0.5, the data exhibit approximate symmetry:")
+    print(approx_symmetry)
+
+    print("\nSkewness values within the range of -1 and -0.5 (negative skewed) or 0.5 and 1 (positive skewed) indicate slightly skewed data distributions:")
+    print(slightly_skewed)
+
+    print("\nData with skewness values less than -1 (negative skewed) or greater than 1 (positive skewed) are considered highly skewed:")
+    print(highly_skewed)    
+
+    return approx_symmetry, slightly_skewed, highly_skewed
+
 def get_high_corr_columns(data, threshold):
     corr_matrix = data.corr()
     print(threshold)
@@ -24,48 +43,6 @@ def get_high_corr_columns(data, threshold):
     # print(len(unique_list))
 
     return unique_list
-
-# def all_LinearRegModel(data, predictor_variable):
-
-#     prices = data[predictor_variable]
-#     features = data.drop(predictor_variable, axis=1)
-
-#     # Splitting the data into training and testing sets
-#     X_train, X_test, Y_train, Y_test = ipp.train_test_split(features, prices, train_size=0.8, random_state=10)
-
-#     # Fitting the linear regression model
-#     reg = ipp.LinearRegression()
-#     model_1 = reg.fit(X_train, Y_train)
-#     print("Train data R squared value is :", model_1.score(X_train, Y_train))
-#     print("Test data R squared values is :", model_1.score(X_test, Y_test))
-
-#     # Storing the coefficients in a DataFrame
-#     slope = ipp.pd.DataFrame(model_1.coef_, index=X_train.columns, columns=["Slope"])
-
-#     # Fitting OLS model
-#     y = Y_train
-#     x = ipp.sm.add_constant(X_train)
-#     mod = ipp.sm.OLS(y, x)
-#     # res = mod.fit()
-#     # res_summary = res.summary()
-
-#     # Storing in a dictionary
-#     objects_dict = {
-#         "Linear_Model": {
-#             "slope_df": slope,
-#             "OLS_model": mod,
-#             }
-#         }
-
-#     print("-------------------------------------------------------------------------------------------------------")
-#     # print(type(slope))
-#     # print(type(mod))
-#     # print(type(res))
-
-#     # # Printing out the dictionary
-#     # print(objects_dict)
-    
-#     return objects_dict
 
 def corr_LinearRegModel(th_value, data, predictor_variable):
     prices = data[predictor_variable]
@@ -116,7 +93,9 @@ def filter_def(compModel):
     # Iterate over the compModel dictionary
     for key, model_data in compModel.items():
         test_value = model_data["Test"]
+        # print(test_value)
         train_value = model_data["Train"]
+        # print(train_value)
     
         # Compare the test value with the best test value found so far
         if test_value > best_test_value:
@@ -135,3 +114,203 @@ def filter_def(compModel):
     print("Value:", compModel[best_model_key])
 
     return dict
+
+def choose_best_transformation(data, list_column_name):
+    # Helper function to apply transformations
+    def apply_transformations(column):
+        transformations = {}
+        transformations['original'] = column
+        # Log Transformation
+        if (column <= 0).any():
+            transformations['log'] = ipp.np.log1p(column - column.min() + 1)
+        else:
+            transformations['log'] = ipp.np.log1p(column)
+        # Square Root Transformation
+        if (column >= 0).all():  # Ensure no negative values for sqrt
+            transformations['sqrt'] = ipp.np.sqrt(column)
+        else:
+            transformations['sqrt'] = ipp.np.nan * len(column)
+        # Box-Cox Transformation (only positive data)
+        if (column > 0).all():  # Ensure all values are positive
+            transformations['box_cox'], _ = ipp.stats.boxcox(column)
+        else:
+            transformations['box_cox'] = ipp.np.nan * len(column)
+        # Yeo-Johnson Transformation
+        transformations['yeo_johnson'], _ = ipp.stats.yeojohnson(column)
+        # Reciprocal Transformation
+        if (column <= 0).any():
+            transformations['reciprocal'] = 1 / (column - column.min() + 1)
+        else:
+            transformations['reciprocal'] = 1 / (column + 1)
+        # Exponential Transformation
+        transformations['exp'] = ipp.np.exp(column - column.min())
+        return transformations
+    
+    best_transformations = {}
+    
+    for column in list_column_name:
+        col_data = data[column]
+        transformations = apply_transformations(col_data)
+        
+        # Plot the distributions
+        fig, axes = ipp.plt.subplots(3, 3, figsize=(18, 15))
+        fig.suptitle(f"Transformations for {column}", fontsize=16)
+        for ax, (trans_name, trans_data) in zip(axes.flatten(), transformations.items()):
+            if not ipp.np.any(ipp.np.isnan(trans_data)):
+                ipp.sns.histplot(trans_data, bins=30, kde=True, ax=ax)
+                ax.set_title(f"{trans_name} transformation")
+            else:
+                ax.set_title(f"{trans_name} transformation (not applicable)")
+        ipp.plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+        ipp.plt.show()
+        
+        # Calculate skewness for each transformation
+        skewness = {trans_name: ipp.pd.Series(trans_data).skew() for trans_name, trans_data in transformations.items() if not ipp.np.any(ipp.np.isnan(trans_data))}
+        print(f"Skewness for different transformations of {column}:\n", skewness)
+        
+        # Select the best transformation (closest to 0 skewness)
+        best_trans_name = min(skewness, key=lambda k: abs(skewness[k]))
+        best_transformations[column] = transformations[best_trans_name]
+        
+        # Compare with original and replace if there's an improvement
+        if abs(skewness[best_trans_name]) < abs(col_data.skew()):
+            new_column_name = f"{column}_{best_trans_name}"
+            data[new_column_name] = best_transformations[column]
+            print(f"Replaced {column} with {best_trans_name} transformation. Renamed to {new_column_name}.\n")
+        else:
+            print(f"No improvement for {column}. Keeping original.\n")
+    
+    # Drop original columns
+    data.drop(columns=list_column_name, inplace=True)
+    
+    return data
+
+def apply_log_transformation(data, columns):
+    # Copy the original data to avoid modifying it directly
+    transformed_data = data.copy()
+    
+    for column in columns:
+        skewness = ipp.skew(transformed_data[column])
+        if skewness > 0.5:  # Positively skewed
+            transformed_column = f'log_{column}'
+            # Apply log transformation
+            transformed_data[transformed_column] = ipp.np.log1p(transformed_data[column])
+            # Recalculate skewness after transformation
+            new_skewness = ipp.skew(transformed_data[transformed_column])
+            if abs(new_skewness) < abs(skewness):
+                # If the new skewness is reduced, keep the transformed column
+                transformed_data = transformed_data.drop(columns=[column])
+            else:
+                # Otherwise, drop the transformed column
+                transformed_data = transformed_data.drop(columns=[transformed_column])
+        elif skewness < -0.5:  # Negatively skewed
+            transformed_column = f'exp_{column}'
+            # Apply exponential transformation (and add 1 to avoid issues with zero values)
+            transformed_data[transformed_column] = ipp.np.expm1(transformed_data[column])
+            # Recalculate skewness after transformation
+            new_skewness = ipp.skew(transformed_data[transformed_column])
+            if abs(new_skewness) < abs(skewness):
+                # If the new skewness is reduced, keep the transformed column
+                transformed_data = transformed_data.drop(columns=[column])
+            else:
+                # Otherwise, try log transformation and compare
+                transformed_column_log = f'log_{column}'
+                transformed_data[transformed_column_log] = ipp.np.log1p(transformed_data[column])
+                new_skewness_log = ipp.skew(transformed_data[transformed_column_log])
+                if abs(new_skewness_log) < abs(skewness):
+                    # If log transformation reduces skewness, keep it
+                    transformed_data = transformed_data.drop(columns=[column, transformed_column])
+                else:
+                    # Otherwise, drop both transformations
+                    transformed_data = transformed_data.drop(columns=[transformed_column, transformed_column_log])
+    
+    return transformed_data
+
+def analyse_model(model):
+    for key, model_data in model.items():
+        try:
+            # Extract necessary information from the model's dictionary
+            ols_model = model_data["OLS_model"]
+            
+            # Fit the OLS model
+            ols_results = ols_model.fit()
+            
+            # Get X_train and Y_train
+            X_train = ols_results.model.exog
+            Y_train = ols_results.model.endog
+            
+            # Extract test data from the fitted model
+            X_test = ols_results.model.exog
+            Y_test = ols_results.model.endog
+
+            # Predicting using the OLS model
+            ols_results = ols_model.fit()
+            Y_pred = ols_results.predict(X_test)
+            
+            # Residuals vs. Fitted Values Plot
+            fitted_values = ols_results.fittedvalues
+            residuals = ols_results.resid
+
+            ipp.plt.scatter(fitted_values, residuals)
+            ipp.plt.xlabel('Fitted values')
+            ipp.plt.ylabel('Residuals')
+            ipp.plt.title(f'Residuals vs Fitted Values for {key}')
+            ipp.plt.axhline(y=0, color='r', linestyle='--')
+            ipp.plt.show()
+
+            # Breusch-Pagan Test
+            bp_test = ipp.sms.het_breuschpagan(residuals, ols_results.model.exog)
+            bp_test_statistic = bp_test[0]
+            bp_p_value = bp_test[1]
+
+            print(f'{key} - Breusch-Pagan test statistic: {bp_test_statistic}')
+            print(f'{key} - P-value: {bp_p_value}')
+
+            # White’s Test
+            white_test = ipp.smd.het_white(residuals, ols_results.model.exog)
+            white_test_statistic = white_test[0]
+            white_p_value = white_test[1]
+
+            print(f'{key} - White test statistic: {white_test_statistic}')
+            print(f'{key} - P-value: {white_p_value}')
+
+            # Residual Plot for Heteroscedasticity
+            abs_residuals = abs(residuals)
+            ipp.plt.scatter(fitted_values, abs_residuals)
+            ipp.plt.xlabel('Fitted values')
+            ipp.plt.ylabel('Absolute Residuals')
+            ipp.plt.title(f'Absolute Residuals vs Fitted Values for {key}')
+            ipp.plt.show()
+
+            # Conclusion
+            conclusion = "Conclusion: "
+            if bp_p_value < 0.05 or white_p_value < 0.05:
+                conclusion += "There is evidence of heteroscedasticity."
+            else:
+                conclusion += "No evidence of heteroscedasticity detected."
+
+            print(conclusion)
+
+        except KeyError as e:
+            print(f"KeyError: {e} - Check the structure of compModel for {key}")
+        except Exception as e:
+            print(f"An unexpected error occurred for {key}: {e}")
+    return(fitted_values,residuals)
+
+def extract_info_model(mmodel):
+    for key, model_data in mmodel.items():
+        # Extract necessary information from the model's dictionary
+        ols_model = model_data["OLS_model"]
+        # train_value = model_data["Train"]
+        # test_value = model_data["Test"]
+    
+        # Get X_train and Y_train
+        X_train = ols_model.exog
+        Y_train = ols_model.endog
+    
+        # Get X_test and Y_test
+        X_test = ols_model.exog
+        Y_test = ols_model.endog
+        ols_results = ols_model.fit()
+        Y_pred = ols_results.predict(X_test)
+    return(X_train,X_test,Y_train,Y_test,Y_pred)
