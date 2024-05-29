@@ -18,11 +18,15 @@ from statsmodels.stats.diagnostic import het_goldfeldquandt
 
 from scipy import stats
 from scipy.stats import skew
+from scipy.stats import zscore
+from sklearn.pipeline import Pipeline
+from sklearn.base import BaseEstimator, TransformerMixin
 
 # Importing custom modules
 from model import *
 from plot import *
 import pylab
+from datapipeline import *
 
 # Set plot style
 plt.style.use('ggplot')

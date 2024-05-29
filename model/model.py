@@ -48,7 +48,7 @@ def corr_LinearRegModel(th_value, data, predictor_variable):
     prices = data[predictor_variable]
     unique_list = ipp.get_high_corr_columns(data, th_value)
     unique_list = [col for col in unique_list if col != predictor_variable]
-
+    # print(unique_list)
     if predictor_variable not in unique_list:
         print("Success")
         features = data[unique_list]
@@ -85,23 +85,52 @@ def corr_LinearRegModel(th_value, data, predictor_variable):
     # print("-------------------------------------------------------------------------------------------------------")
     return objects_dict
 
-def filter_def(compModel):
+# def filter_def(compModel):
     
+#     best_model_key = None
+#     best_test_value = float('-inf')
+
+#     # Iterate over the compModel dictionary
+#     for key, model_data in compModel.items():
+#         test_value = model_data["Test"]
+#         # print(test_value)
+#         train_value = model_data["Train"]
+#         # print(train_value)
+    
+#         # Compare the test value with the best test value found so far
+#         if test_value > best_test_value:
+#             # Update the best model and its test value
+#             best_model_key = key
+#             best_test_value = test_value
+
+#     # Remove all models except the best one
+#     for key in list(compModel.keys()):
+#         if key != best_model_key:
+#             del compModel[key]
+
+#     # Print the best model
+#     print("Best Model:")
+#     print("Key:", best_model_key)
+#     print("Value:", compModel[best_model_key])
+
+#     return dict
+
+def filter_def(compModel):
     best_model_key = None
     best_test_value = float('-inf')
+    best_train_value = float('-inf')
 
     # Iterate over the compModel dictionary
     for key, model_data in compModel.items():
         test_value = model_data["Test"]
-        # print(test_value)
         train_value = model_data["Train"]
-        # print(train_value)
-    
-        # Compare the test value with the best test value found so far
-        if test_value > best_test_value:
-            # Update the best model and its test value
+
+        # Compare the test and train values with the best values found so far
+        if test_value > best_test_value or train_value > best_train_value:
+            # Update the best model and its test/train values
             best_model_key = key
             best_test_value = test_value
+            best_train_value = train_value
 
     # Remove all models except the best one
     for key in list(compModel.keys()):
@@ -113,7 +142,7 @@ def filter_def(compModel):
     print("Key:", best_model_key)
     print("Value:", compModel[best_model_key])
 
-    return dict
+    return compModel  # Return the updated compModel dictionary
 
 def choose_best_transformation(data, list_column_name):
     # Helper function to apply transformations
@@ -314,3 +343,21 @@ def extract_info_model(mmodel):
         ols_results = ols_model.fit()
         Y_pred = ols_results.predict(X_test)
     return(X_train,X_test,Y_train,Y_test,Y_pred)
+
+def add_model_info(model):
+    model_names = []
+    train_scores = []
+    test_scores = []
+    for model_name, model_data in model.items():
+        model_names.append(model_data['Threshold value'])
+        train_scores.append(model_data['Train'])
+        test_scores.append(model_data['Test'])
+
+    # Creating DataFrame
+    Eval = ipp.pd.DataFrame({
+        'Model': model_names,
+        'Train Score': train_scores,
+        'Test Score': test_scores
+    })
+
+    return Eval

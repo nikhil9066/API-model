@@ -131,8 +131,14 @@ def actVpre(Y_test,Y_pred):
     plt.grid(True)
     plt.show()
 
+def plot_outliers(data):
+    ipp.plt.figure(figsize=(15, 10))
+    ipp.sns.boxplot(data=data)
+    ipp.plt.title('Boxplots')
+    ipp.plt.xticks(rotation=90)  # Rotate column names if necessary
+    ipp.plt.show()
+
 def plot_model_eval(model_Eval):
-    # Convert model labels to numerical indices for plotting
     numeric_labels = list(range(len(model_Eval)))
     plt.figure(figsize=(10, 6))
     plt.plot(numeric_labels, model_Eval['Train Score'], label='Train Score', marker='o')
@@ -140,8 +146,17 @@ def plot_model_eval(model_Eval):
     plt.title('Model Evaluation')
     plt.xlabel('Model')
     plt.ylabel('Score')
-    plt.ylim(0.4, 0.9)  # Setting y-axis limits for better visualization
+    plt.ylim(0.4, 0.9)  
     plt.legend()
     plt.grid(True)
     plt.xticks(numeric_labels, model_Eval['Model'], rotation=45)
+    
+    # Draw a dotted horizontal line from the first point for Train Score
+    first_train_score = model_Eval['Train Score'][0]
+    plt.axhline(y=first_train_score, color='red', linestyle='--', linewidth=1)
+    
+    # Draw a dotted horizontal line from the first point for Test Score
+    first_test_score = model_Eval['Test Score'][0]
+    plt.axhline(y=first_test_score, color='blue', linestyle='--', linewidth=1)
+    
     plt.show()
