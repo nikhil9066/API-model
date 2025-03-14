@@ -20,6 +20,7 @@ from scipy import stats
 from scipy.stats import skew
 from scipy.stats import zscore
 from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
 from sklearn.base import BaseEstimator, TransformerMixin
 
 # Importing custom modules
@@ -27,6 +28,8 @@ from model import *
 from plot import *
 import pylab
 from datapipeline import *
+
+import warnings
 
 # Set plot style
 plt.style.use('ggplot')
