@@ -61,11 +61,12 @@ def plot_all_numerical_columns(data):
     plt.show()
 
 def corrplot(mat):
-
     plt.figure(figsize=(15,10))
     plt.xticks(fontsize=14)
     plt.yticks(fontsize=14)
     sns.heatmap(mat,annot=True,annot_kws={"size":14},linewidth=.5)
+    plt.show()
+    print("Plot done")
 
 def get_high_corr_columns(data, threshold):
     corr_matrix = data.corr()
@@ -90,35 +91,35 @@ def get_high_corr_columns(data, threshold):
 
     return unique_list
 
-def plot_scatter_pairs_and_store(data, matrix, val):
-    correlated_pairs = []  # Initialize an empty list to store the correlated pairs
+# def plot_scatter_pairs_and_store(data, matrix, val):
+#     correlated_pairs = []  # Initialize an empty list to store the correlated pairs
 
-    # Define a function to plot scatter plots for specific columns
-    def plot_scatter(column1, column2):
-        plt.figure(figsize=(10, 6))
-        sns.scatterplot(x=column1, y=column2, data=data, color="green", alpha=0.5)
-        plt.xlabel(f"{column1.capitalize()}", fontsize=12)
-        plt.ylabel(f"{column2.capitalize()}", fontsize=12)
-        plt.title(f"{column1.capitalize()} vs {column2.capitalize()}", fontsize=12)
-        # plt.show()
+#     # Define a function to plot scatter plots for specific columns
+#     def plot_scatter(column1, column2):
+#         plt.figure(figsize=(10, 6))
+#         sns.scatterplot(x=column1, y=column2, data=data, color="green", alpha=0.5)
+#         plt.xlabel(f"{column1.capitalize()}", fontsize=12)
+#         plt.ylabel(f"{column2.capitalize()}", fontsize=12)
+#         plt.title(f"{column1.capitalize()} vs {column2.capitalize()}", fontsize=12)
+#         # plt.show()
 
-    # Iterate through the upper triangle of the correlation matrix
-    for i in range(len(matrix.columns)):
-        for j in range(i+1, len(matrix.columns)):
-            correlation = abs(matrix.iloc[i, j])
-            if correlation >= val:  # Check if correlation exceeds the threshold
-                correlated_pairs.append((data.columns[i], data.columns[j]))  # Store correlated pair
-                plot_scatter(data.columns[i], data.columns[j])  # Plot scatter plot for the pair
+#     # Iterate through the upper triangle of the correlation matrix
+#     for i in range(len(matrix.columns)):
+#         for j in range(i+1, len(matrix.columns)):
+#             correlation = abs(matrix.iloc[i, j])
+#             if correlation >= val:  # Check if correlation exceeds the threshold
+#                 correlated_pairs.append((data.columns[i], data.columns[j]))  # Store correlated pair
+#                 plot_scatter(data.columns[i], data.columns[j])  # Plot scatter plot for the pair
 
-    return correlated_pairs
+#     return correlated_pairs
 
-def plot_corr_scatter(data,correlated_pairs):
-    for i in correlated_pairs:
-        column1, column2 = i
-        sns.lmplot(x=column1,y=column2,data=data,height=8)
-        plt.xlabel(column1)
-        plt.ylabel(column2)
-        plt.show()
+# def plot_corr_scatter(data,correlated_pairs):
+#     for i in correlated_pairs:
+#         column1, column2 = i
+#         sns.lmplot(x=column1,y=column2,data=data,height=8)
+#         plt.xlabel(column1)
+#         plt.ylabel(column2)
+#         plt.show()
 
 def actVpre(Y_test,Y_pred):
     # Creating the scatter plot
