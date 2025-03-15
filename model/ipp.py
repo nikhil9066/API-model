@@ -4,11 +4,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.graph_objects as go
+import pickle
+from datetime import datetime
+import shutil
+import os
+import json
+import os
+import sys
 
 # Importing libraries for statistical modeling and machine learning
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_absolute_error, mean_squared_error
+from sklearn.metrics import mean_absolute_error, mean_squared_error,r2_score
 
 import statsmodels.api as sm
 import statsmodels.stats.api as sms
@@ -33,3 +40,5 @@ import warnings
 
 # Set plot style
 plt.style.use('ggplot')
+
+model_dir = "model_dump"
