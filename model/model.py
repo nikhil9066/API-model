@@ -466,3 +466,85 @@ def corr_Linear_RegModel(th_value, data, predictor_variable,split):
     }
 
     return objects_dict
+
+## -----------------------------------------------------------------------------
+# Function for REGRESSION MODEL
+
+def Reg_model(df, predictor_variable, name):
+    # Extracting features (X) and target (y)
+    X = df.drop(columns=[predictor_variable])
+    y = df[predictor_variable]
+
+    # Splitting the data into train and test sets
+    X_train, X_test, y_train, y_test = ipp.train_test_split(X, y, test_size=0.2, random_state=42)
+    
+    # Initializing and training the model
+    model = ipp.LinearRegression()
+    model.fit(X_train, y_train)
+    
+    # Predicting values for train and test data
+    y_train_pred = model.predict(X_train)
+    y_test_pred = model.predict(X_test)
+    
+    # Calculating R2 score for both train and test
+    train_score = ipp.r2_score(y_train, y_train_pred)
+    test_score = ipp.r2_score(y_test, y_test_pred)
+    
+    # print("----------------------TESTING PURPOSE--------------------------------------")
+    # print(train_score, test_score)
+    # print("X_train shape:", X_train.shape, "X_test shape:", X_test.shape)
+    # print("y_train shape:", y_train.shape, "y_test shape:", y_test.shape)
+    # print("Unique values in y_test:", np.unique(y_test))
+    # y_pred = model.predict(X_test)
+    # print("Predictions:", y_pred)
+    # print("Actual y_test:", y_test.values)
+    # print("------------------------------------------------------------------")
+    
+    # Return the results
+    return train_score, test_score, ipp.r2_score(y_test, y_test_pred), model
+
+# Function to update the JSON structure with model results
+def interModel(df, predictor_variable, name):
+    # Call the Reg_model function and store the results
+    model_dir = "model_dump"
+    json_file_path = ipp.os.path.join(model_dir, "status.json")
+    train_score, test_score, r2_score_value, model = ipp.Reg_model(df, predictor_variable, name)
+
+    if ipp.os.path.exists(json_file_path):
+        with open(json_file_path, "r") as json_file:
+            json_data = ipp.json.load(json_file)
+    else:
+        print("issue with json file ")
+        ipp.sys.exit()
+    
+    # Save the model and get the file path
+    model_file = ipp.save_model(model, name)
+    
+    # Store results under the given model name inside "modeling"
+    json_data["modeling"][name] = {
+        "train": train_score,
+        "test": test_score,
+        "r2_score": r2_score_value,
+        "model": model_file  # Storing only the filename
+    }
+
+    json_data["modeling"]["efficiency"] = False # Set to True if efficiency is achieved
+    
+    # Print updated JSON (optional)
+    # Save the updated JSON data back to status.json
+    with open(json_file_path, "w") as json_file:
+        ipp.json.dump(json_data, json_file, indent=4)
+    # print(json.dumps(json_data, indent=4))
+
+
+
+# Function to pickle the model and return the file path
+def save_model(model, name):
+    timestamp = ipp.datetime.now().strftime("%Y%m%d_%H%M%S")
+    file_name = f"{name}_{timestamp}.pkl"
+    file_path = ipp.os.path.join(ipp.model_dir, file_name)
+    
+    with open(file_path, "wb") as f:
+        ipp.pickle.dump(model, f)
+
+    return file_name  # Returning only the file name to store in JSON
