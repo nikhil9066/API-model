@@ -11,6 +11,7 @@ import os
 import json
 import os
 import sys
+import warnings
 
 # Importing libraries for statistical modeling and machine learning
 from sklearn.linear_model import LinearRegression
@@ -31,14 +32,18 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.base import BaseEstimator, TransformerMixin
 
 # Importing custom modules
-from model import *
-from plot import *
-import pylab
-from datapipeline import *
-
-import warnings
+from datapipeline import *  # Import preprocessing pipeline
+from model import *  # Import ML models
+from plot import *  # Import visualization functions
+### from regression import *  # Import regression models
+# from preprocessing_pipeline import *  # Import additional preprocessing
+from setup import *  # Import setup functions
 
 # Set plot style
 plt.style.use('ggplot')
 
+
+## Paths and global variables
 model_dir = "model_dump"
+json_file_path = os.path.join(model_dir, "status.json")
+data_folder = "data"
