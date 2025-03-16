@@ -1,0 +1,29 @@
+{
+    "pre_check": {
+        "Cache": true,
+        "Model_dir": true,
+        "data_dir": true,
+        "json_dump": true
+    },
+    "load_data": {
+        "csv": false,
+        "excel": false,
+        "other": false
+    },
+    "pre_processing": {
+        "null_handling": false,
+        "outliers": {
+            "detection": false
+        }
+    },
+    "modeling": {},
+    "hyperparameter_tuning": {
+        "grid_search": false,
+        "random_search": false
+    },
+    "final_checks": {
+        "evaluate_performance": false,
+        "check_overfitting": false,
+        "check_generalization": false
+    }
+}

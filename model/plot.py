@@ -161,3 +161,22 @@ def plot_model_eval(model_Eval):
     plt.axhline(y=first_test_score, color='blue', linestyle='--', linewidth=1)
     
     plt.show()
+
+
+## NEW THINGS ARE ADDED HERE
+
+def Comp_plot_boxplots(df, df_cleaned, predictor_variable):
+
+    fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+
+    # Plot the boxplot for the original DataFrame (before outlier removal)
+    sns.boxplot(df[predictor_variable], ax=axes[0])
+    axes[0].set_title('Boxplot Before Outlier Removal')
+
+    # Plot the boxplot for the cleaned DataFrame (after outlier removal)
+    sns.boxplot(df_cleaned[predictor_variable], ax=axes[1])
+    axes[1].set_title('Boxplot After Outlier Removal')
+
+    # Display the plots
+    plt.tight_layout()
+    plt.show()
