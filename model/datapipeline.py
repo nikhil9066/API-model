@@ -75,20 +75,7 @@ def remove_outliers_percentile(df, predictor_variable) -> ipp.pd.DataFrame:
 
 ## other things added
 
-import json
-import os
 
-def update_outlier_status_json(model_dir, outliers_removed, method_used):
-    """
-    Updates the status.json file with the outlier detection status and details.
-    
-    Parameters:
-        model_dir (str): Directory where the model and status.json are stored.
-        outliers_removed (int): Number of outliers removed.
-        method_used (str): The method used for outlier detection and removal.
-    """
-    
-    
 
 # Example use case inside the remove_outliers function
 def main_outliers(df, predictor_variable):
@@ -103,7 +90,7 @@ def main_outliers(df, predictor_variable):
 
     # Load the existing status.json data
     with open(ipp.json_file_path, 'r') as f:
-        status_data = json.load(f)
+        status_data = ipp.json.load(f)
     
     # Update outlier detection status
     if outliers_removed > 0:
@@ -117,6 +104,106 @@ def main_outliers(df, predictor_variable):
     
     # Save the updated status data back to the file
     with open(ipp.json_file_path, 'w') as f:
-        json.dump(status_data, f, indent=4)
+        ipp.json.dump(status_data, f, indent=4)
     
     return df_filtered
+
+
+## adding the CFS part
+def CFS_update(lower_threshold, high_loss, low_loss):
+    """
+    Updates the status.json file by modifying the "CFS" section when feature selection occurs.
+
+    Parameters:
+    - status_file (str): Path to the status.json file.
+    - lower_threshold (float): The threshold used for low correlation feature removal.
+    - high_loss (dict): Features removed due to high correlation (above 0.90).
+    - low_loss (dict): Features removed due to low correlation (below lower_threshold).
+    """
+    
+    # If no features are removed, do not update the file
+    if not high_loss and not low_loss:
+        # print("No features removed. Skipping status.json update.")
+        return
+
+    try:
+        # Load existing status.json
+        with open(ipp.json_file_path, "r") as file:
+            status_data = ipp.json.load(file)
+    except FileNotFoundError:
+        status_data = {}
+
+    # Ensure "pre_processing" and "CFS" sections exist
+    if "pre_processing" not in status_data:
+        status_data["pre_processing"] = {}
+    if "CFS" not in status_data["pre_processing"]:
+        status_data["pre_processing"]["CFS"] = {"feature_selection": False}
+
+    # Set feature_selection to True since we're removing features
+    status_data["pre_processing"]["CFS"]["feature_selection"] = True
+
+    # Create an entry with timestamp
+    timestamp = ipp.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    update_entry = {
+        "timestamp": timestamp,
+        "lower_threshold": lower_threshold,
+        "High_loss": high_loss,
+        "Low_loss": low_loss
+    }
+
+    # Append new entry without overwriting previous ones
+    if "history" not in status_data["pre_processing"]["CFS"]:
+        status_data["pre_processing"]["CFS"]["history"] = []
+    
+    status_data["pre_processing"]["CFS"]["history"].append(update_entry)
+
+    # Write the updated status back to the file
+    with open(ipp.json_file_path, "w") as file:
+        ipp.json.dump(status_data, file, indent=4)
+
+    # print("✅ status.json updated successfully!")
+
+def correlation_feature_selection(df, lower_threshold, target_variable="medv"):
+    HIGHER_THRESHOLD = 0.90  # Constant for higher threshold
+    correlation_matrix = df.corr()  # Compute correlation matrix
+    target_corr = correlation_matrix[target_variable]  # Correlations with target
+
+    # Identifying features to drop due to low correlation with the predictive variable
+    low_correlation_features = {
+        col: round(target_corr[col], 4)
+        for col in target_corr.index
+        if abs(target_corr[col]) < lower_threshold and col != target_variable
+    }
+
+    # Identifying highly correlated features (above 0.90) and keeping only one from each pair
+    high_correlation_features = {}
+    processed = set()
+
+    for col in correlation_matrix.columns:
+        if col == target_variable:
+            continue
+        for row in correlation_matrix.columns:
+            if row != col and row != target_variable and (row, col) not in processed:
+                corr_value = abs(correlation_matrix.loc[col, row])
+                if corr_value > HIGHER_THRESHOLD:
+                    # Drop the feature that has lower correlation with the target variable
+                    if abs(target_corr[col]) < abs(target_corr[row]):
+                        high_correlation_features[col] = round(corr_value, 4)
+                    else:
+                        high_correlation_features[row] = round(corr_value, 4)
+                processed.add((col, row))
+
+    # Logging features being dropped
+    # print(high_correlation_features)
+    # if high_correlation_features:
+    #     print("High_loss = {", ", ".join(f"{k}: {v}" for k, v in high_correlation_features.items()), "} (Highly correlated features dropped)")
+
+    # if low_correlation_features:
+    #     print("Low_loss = {", ", ".join(f"{k}: {v}" for k, v in low_correlation_features.items()), "} (Low correlation features dropped)")
+
+    # Drop the selected features
+    df_selected = df.drop(columns=list(high_correlation_features.keys()) + list(low_correlation_features.keys()))
+    CFS_update(lower_threshold, high_correlation_features, low_correlation_features)
+    return df_selected
+
+## CFS ends here
