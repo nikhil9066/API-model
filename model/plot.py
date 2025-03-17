@@ -24,38 +24,26 @@ import ipp
 #         plt.title(f"{column.capitalize()} Distribution (Seaborn)", fontsize=16)
 #         plt.show()
 
-def plot_all_numerical_columns(data):
+def plot_numerical_columns(data):
     numerical_columns = data.select_dtypes(include=['float64', 'int64']).columns
-    n_cols = 2  # number of columns in the plot grid for each column
-    n_rows = len(numerical_columns)  # number of rows needed
+    n_cols = 2  # Number of plots per row
+    n_rows = len(numerical_columns)  # Number of rows needed
 
-    fig, axes = plt.subplots(n_rows, n_cols * 2, figsize=(20, 5 * n_rows))
-    axes = axes.flatten()  # Flatten the axes array for easy iteration
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=(14, 5 * n_rows))
+    axes = axes.flatten() if n_rows > 1 else [axes]  # Ensure axes is iterable
 
     for i, column in enumerate(numerical_columns):
-        # Plot using matplotlib
-        axes[4 * i].hist(data[column], bins=50, ec="black", color="#FFEB3B")
-        axes[4 * i].set_xlabel(column.capitalize(), fontsize=16)
-        axes[4 * i].set_ylabel("Frequency", fontsize=16)
-        axes[4 * i].set_title(f"{column.capitalize()} Distribution (Matplot)", fontsize=16)
+        # Histogram with KDE
+        sns.histplot(data[column], bins=50, color="#512DA8", ax=axes[2 * i], kde=True)
+        axes[2 * i].set_xlabel(column.capitalize(), fontsize=14)
+        axes[2 * i].set_ylabel("Frequency", fontsize=14)
+        axes[2 * i].set_title(f"{column.capitalize()} Distribution", fontsize=14)
 
-        # Plot using seaborn
-        sns.histplot(data[column], bins=50, color="#512DA8", ax=axes[4 * i + 1], kde=True)
-        axes[4 * i + 1].set_xlabel(column.capitalize(), fontsize=16)
-        axes[4 * i + 1].set_ylabel("Frequency", fontsize=16)
-        axes[4 * i + 1].set_title(f"{column.capitalize()} Distribution (Seaborn)", fontsize=16)
-
-        # Plot KDE using matplotlib
-        sns.kdeplot(data[column], ax=axes[4 * i + 2], color="#FFEB3B")
-        axes[4 * i + 2].set_xlabel(column.capitalize(), fontsize=16)
-        axes[4 * i + 2].set_ylabel("Density", fontsize=16)
-        axes[4 * i + 2].set_title(f"{column.capitalize()} KDE (Matplot)", fontsize=16)
-
-        # Plot KDE using seaborn
-        sns.kdeplot(data[column], ax=axes[4 * i + 3], color="#512DA8")
-        axes[4 * i + 3].set_xlabel(column.capitalize(), fontsize=16)
-        axes[4 * i + 3].set_ylabel("Density", fontsize=16)
-        axes[4 * i + 3].set_title(f"{column.capitalize()} KDE (Seaborn)", fontsize=16)
+        # KDE Plot
+        sns.kdeplot(data[column], ax=axes[2 * i + 1], color="#512DA8")
+        axes[2 * i + 1].set_xlabel(column.capitalize(), fontsize=14)
+        axes[2 * i + 1].set_ylabel("Density", fontsize=14)
+        axes[2 * i + 1].set_title(f"{column.capitalize()} KDE Plot", fontsize=14)
 
     plt.tight_layout()
     plt.show()
