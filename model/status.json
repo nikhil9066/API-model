@@ -1,0 +1,71 @@
+{
+    "pre_processing": {
+        "CFS": {
+            "CFS_runs": [
+                {
+                    "timestamp": "2025-03-16 20:56:13",
+                    "feature_selection": true,
+                    "lower_threshold": 0.7,
+                    "Removed_features": [
+                        "tax",
+                        "rad"
+                    ]
+                },
+                {
+                    "timestamp": "2025-03-16 20:56:32",
+                    "feature_selection": true,
+                    "lower_threshold": 0.7,
+                    "Removed_features": [
+                        "tax",
+                        "rad"
+                    ]
+                },
+                {
+                    "timestamp": "2025-03-16 20:56:41",
+                    "feature_selection": true,
+                    "lower_threshold": 0.5,
+                    "Removed_features": [
+                        "tax",
+                        "rad"
+                    ]
+                },
+                {
+                    "timestamp": "2025-03-16 20:56:43",
+                    "feature_selection": true,
+                    "lower_threshold": 0.5,
+                    "Removed_features": [
+                        "tax",
+                        "rad"
+                    ]
+                },
+                {
+                    "timestamp": "2025-03-16 20:57:48",
+                    "feature_selection": true,
+                    "lower_threshold": 0.3,
+                    "Removed_features": [
+                        "rad",
+                        "tax"
+                    ]
+                },
+                {
+                    "timestamp": "2025-03-16 20:57:48",
+                    "feature_selection": true,
+                    "lower_threshold": 0.5,
+                    "Removed_features": [
+                        "rad",
+                        "tax"
+                    ]
+                },
+                {
+                    "timestamp": "2025-03-16 20:57:48",
+                    "feature_selection": true,
+                    "lower_threshold": 0.7,
+                    "Removed_features": [
+                        "rad",
+                        "tax"
+                    ]
+                }
+            ]
+        }
+    }
+}
