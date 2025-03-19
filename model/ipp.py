@@ -27,8 +27,10 @@ from statsmodels.stats.diagnostic import het_goldfeldquandt
 from scipy import stats
 from scipy.stats import skew
 from scipy.stats import zscore
+from scipy.stats import boxcox
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import PowerTransformer
 from sklearn.base import BaseEstimator, TransformerMixin
 
 # Importing custom modules
