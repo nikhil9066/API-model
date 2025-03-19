@@ -17,6 +17,20 @@
         },
         "CFS": {
             "feature_selection": false
+        },
+        "Skew": {
+            "High": {
+                "handling": false,
+                "features": []
+            },
+            "Moderate": {
+                "handling": false,
+                "features": []
+            },
+            "Low": {
+                "handling": false,
+                "features": []
+            }
         }
     },
     "modeling": {},

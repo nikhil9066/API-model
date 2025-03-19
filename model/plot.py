@@ -54,7 +54,7 @@ def corrplot(mat):
     plt.yticks(fontsize=14)
     sns.heatmap(mat,annot=True,annot_kws={"size":14},linewidth=.5)
     plt.show()
-    print("Plot done")
+    # print("Plot done")
 
 def get_high_corr_columns(data, threshold):
     corr_matrix = data.corr()
