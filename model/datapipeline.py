@@ -109,35 +109,27 @@ def main_outliers(df, predictor_variable):
     return df_filtered
 
 
-## adding the CFS part
-def CFS_update(lower_threshold, high_loss, low_loss):
+## adding the CFS status update part
+def update_low_correlation_features(lower_threshold, low_loss):
     """
-    Updates the status.json file by modifying the "CFS" section when feature selection occurs.
+    Updates the status.json file when low-correlation features are removed.
 
     Parameters:
-    - status_file (str): Path to the status.json file.
     - lower_threshold (float): The threshold used for low correlation feature removal.
-    - high_loss (dict): Features removed due to high correlation (above 0.90).
     - low_loss (dict): Features removed due to low correlation (below lower_threshold).
     """
     
-    # If no features are removed, do not update the file
-    if not high_loss and not low_loss:
-        # print("No features removed. Skipping status.json update.")
+    if not low_loss:
         return
 
     try:
-        # Load existing status.json
         with open(ipp.json_file_path, "r") as file:
             status_data = ipp.json.load(file)
     except FileNotFoundError:
         status_data = {}
 
     # Ensure "pre_processing" and "CFS" sections exist
-    if "pre_processing" not in status_data:
-        status_data["pre_processing"] = {}
-    if "CFS" not in status_data["pre_processing"]:
-        status_data["pre_processing"]["CFS"] = {"feature_selection": False}
+    status_data.setdefault("pre_processing", {}).setdefault("CFS", {"feature_selection": False})
 
     # Set feature_selection to True since we're removing features
     status_data["pre_processing"]["CFS"]["feature_selection"] = True
@@ -147,38 +139,86 @@ def CFS_update(lower_threshold, high_loss, low_loss):
     update_entry = {
         "timestamp": timestamp,
         "lower_threshold": lower_threshold,
-        "High_loss": high_loss,
         "Low_loss": low_loss
     }
 
     # Append new entry without overwriting previous ones
-    if "history" not in status_data["pre_processing"]["CFS"]:
-        status_data["pre_processing"]["CFS"]["history"] = []
-    
-    status_data["pre_processing"]["CFS"]["history"].append(update_entry)
+    status_data["pre_processing"]["CFS"].setdefault("history", []).append(update_entry)
 
     # Write the updated status back to the file
     with open(ipp.json_file_path, "w") as file:
         ipp.json.dump(status_data, file, indent=4)
 
-    # print("✅ status.json updated successfully!")
 
-def correlation_feature_selection(df, lower_threshold, target_variable="medv"):
-    HIGHER_THRESHOLD = 0.90  # Constant for higher threshold
-    correlation_matrix = df.corr()  # Compute correlation matrix
-    target_corr = correlation_matrix[target_variable]  # Correlations with target
+def update_high_correlation_features(high_loss):
+    """
+    Updates the status.json file when high-correlation features are removed.
 
-    # Identifying features to drop due to low correlation with the predictive variable
+    Parameters:
+    - high_loss (dict): Features removed due to high correlation (above 0.90).
+    """
+    
+    if not high_loss:
+        return
+
+    try:
+        with open(ipp.json_file_path, "r") as file:
+            status_data = ipp.json.load(file)
+    except FileNotFoundError:
+        status_data = {}
+
+    # Ensure "pre_processing" and "CFS" sections exist
+    status_data.setdefault("pre_processing", {}).setdefault("CFS", {"feature_selection": False})
+
+    # Set feature_selection to True since we're removing features
+    status_data["pre_processing"]["CFS"]["feature_selection"] = True
+
+    # Create an entry with timestamp
+    timestamp = ipp.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    update_entry = {
+        "timestamp": timestamp,
+        "High_loss": high_loss,
+    }
+
+    # Append new entry without overwriting previous ones
+    status_data["pre_processing"]["CFS"].setdefault("history", []).append(update_entry)
+
+    # Write the updated status back to the file
+    with open(ipp.json_file_path, "w") as file:
+        ipp.json.dump(status_data, file, indent=4)
+
+# Section Ends
+
+## CFS Section
+def remove_low_correlation_features(df, lower_threshold, target_variable):
+    """Removes features with correlation below the given lower_threshold with the target variable."""
+    correlation_matrix = df.corr()
+    target_corr = correlation_matrix[target_variable]
+
+    # Identify low correlation features
     low_correlation_features = {
         col: round(target_corr[col], 4)
         for col in target_corr.index
         if abs(target_corr[col]) < lower_threshold and col != target_variable
     }
 
-    # Identifying highly correlated features (above 0.90) and keeping only one from each pair
+    # Drop low correlation features
+    df_selected = df.drop(columns=list(low_correlation_features.keys()))
+
+    # Return DataFrame, removed features, and threshold
+    return df_selected, {"Low_loss": low_correlation_features, "Threshold": lower_threshold}
+
+
+def remove_high_correlation_features(df, target_variable):
+    """Removes one feature from each highly correlated pair (correlation above 0.90)."""
+    HIGHER_THRESHOLD = 0.90
+    correlation_matrix = df.corr()
+    target_corr = correlation_matrix[target_variable]
+
     high_correlation_features = {}
     processed = set()
 
+    # Identify highly correlated features
     for col in correlation_matrix.columns:
         if col == target_variable:
             continue
@@ -186,24 +226,176 @@ def correlation_feature_selection(df, lower_threshold, target_variable="medv"):
             if row != col and row != target_variable and (row, col) not in processed:
                 corr_value = abs(correlation_matrix.loc[col, row])
                 if corr_value > HIGHER_THRESHOLD:
-                    # Drop the feature that has lower correlation with the target variable
+                    # Drop the feature with lower correlation to the target variable
                     if abs(target_corr[col]) < abs(target_corr[row]):
                         high_correlation_features[col] = round(corr_value, 4)
                     else:
                         high_correlation_features[row] = round(corr_value, 4)
                 processed.add((col, row))
 
-    # Logging features being dropped
-    # print(high_correlation_features)
-    # if high_correlation_features:
-    #     print("High_loss = {", ", ".join(f"{k}: {v}" for k, v in high_correlation_features.items()), "} (Highly correlated features dropped)")
+    # Drop high correlation features
+    df_selected = df.drop(columns=list(high_correlation_features.keys()))
 
-    # if low_correlation_features:
-    #     print("Low_loss = {", ", ".join(f"{k}: {v}" for k, v in low_correlation_features.items()), "} (Low correlation features dropped)")
+    # Return DataFrame and removed features
+    return df_selected, {"High_loss": high_correlation_features, "Threshold": HIGHER_THRESHOLD}
 
-    # Drop the selected features
-    df_selected = df.drop(columns=list(high_correlation_features.keys()) + list(low_correlation_features.keys()))
-    CFS_update(lower_threshold, high_correlation_features, low_correlation_features)
-    return df_selected
+## Section Ends
 
-## CFS ends here
+## Normality Check
+# Function to check normality using multiple tests
+def check_normality(df):
+    results = []
+    
+    for col in df.columns:
+        data = df[col].dropna()
+        shapiro_p = ipp.stats.shapiro(data)[1] if len(data) < 5000 else ipp.np.nan  # Shapiro fails for large samples
+        ks_p = ipp.stats.kstest(data, 'norm')[1]
+        dagostino_p = ipp.stats.normaltest(data)[1]
+        
+        skewness = data.skew()
+        
+        results.append({
+            "Feature": col,
+            "Skewness": skewness,
+            "Shapiro-Wilk p": shapiro_p,
+            "K-S Test p": ks_p,
+            "D’Agostino p": dagostino_p,
+            "Needs Transformation": (abs(skewness) > 0.5) or (dagostino_p < 0.05) or (ks_p < 0.05)
+        }) 
+    
+    return ipp.pd.DataFrame(results)
+## end of normality check
+
+
+## skewed features transformation
+# Function to handle highly skewed features
+def handle_high_skew(df_selected_3, highly_skewed):
+    print("\n🔹 Transforming Highly Skewed Features...")
+    transformed_features = []
+    def transform_column(col, transformations):
+        original_skew = df_selected_3[col].skew()
+        best_method, best_data, best_skew = None, df_selected_3[col], original_skew
+
+        for name, transformed in transformations.items():
+            if transformed is not None:
+                new_skew = ipp.pd.Series(transformed).skew()
+                if abs(new_skew) < abs(best_skew) * 0.9:  # Accept if at least 10% better
+                    best_method, best_data, best_skew = name, transformed, new_skew
+
+        return best_method, best_data, best_skew
+
+    for col in highly_skewed:
+        original_data = df_selected_3[col].copy()  # Save original before dropping
+
+        shift_val = abs(df_selected_3[col].min()) + 1 if (df_selected_3[col] <= 0).any() else 0
+
+        transformations = {
+            'log': ipp.np.log1p(df_selected_3[col] + shift_val) if (df_selected_3[col] + shift_val > 0).all() else None,
+            'sqrt': ipp.np.sqrt(df_selected_3[col] + shift_val) if (df_selected_3[col] + shift_val >= 0).all() else None,
+            'boxcox': None,
+            'power': ipp.PowerTransformer(method='yeo-johnson').fit_transform(df_selected_3[[col]]).flatten()
+        }
+
+        try:
+            if (df_selected_3[col] + shift_val > 0).all():
+                transformations['boxcox'] = ipp.boxcox(df_selected_3[col] + shift_val)[0]
+        except Exception as e:
+            print(f"⚠️ Box-Cox failed for {col}: {e}")
+
+        best_method, best_data, best_skew = transform_column(col, transformations)
+
+        if best_method:
+            new_col_name = f"{col}_{best_method}"
+            df_selected_3[new_col_name] = best_data  
+            df_selected_3.drop(columns=[col], inplace=True)
+            transformed_features.append(col)
+
+            # Plot comparison (Overlayed)
+            ipp.plt.figure(figsize=(8, 5))
+            ipp.sns.histplot(original_data, bins=30, kde=True, color="red", label="Original", alpha=0.5)
+            ipp.sns.histplot(df_selected_3[new_col_name], bins=30, kde=True, color="blue", label="Transformed", alpha=0.5)
+            ipp.plt.title(f"Overlayed Histogram: {col} (Original vs. {best_method})")
+            ipp.plt.legend()
+            ipp.plt.show()
+        
+        try:
+            with open(ipp.json_file_path, "r") as file:
+                status_data = ipp.json.load(file)
+        except FileNotFoundError:
+            status_data = {}
+
+        # Set feature_selection to True since we're removing features
+        if transformed_features:
+            status_data["pre_processing"]["Skew"]["High"]["handling"] = True
+            status_data["pre_processing"]["Skew"]["High"]["features"] = transformed_features
+
+        # Write the updated status back to the file
+        with open(ipp.json_file_path, "w") as file:
+            ipp.json.dump(status_data, file, indent=4)
+
+    print("\n✅ Completed Transformations for Highly Skewed Features.")
+    return df_selected_3
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Function to handle moderately skewed features
+def handle_moderate_skew(df_selected_3, moderately_skewed):
+    print("\n🔹 Applying Winsorization to Moderately Skewed Features...")
+    transformed_features = []  # Track successfully transformed features
+
+    for col in moderately_skewed:
+        original_data = df_selected_3[col].copy()
+        df_selected_3[col] = ipp.stats.mstats.winsorize(df_selected_3[col], limits=[0.05, 0.05])  # Capping extreme 5% values
+        transformed_features.append(col)
+
+        # Plot comparison (Before vs. After)
+        fig, axes = ipp.plt.subplots(1, 2, figsize=(12, 5))
+
+        ipp.sns.boxplot(x=original_data, ax=axes[0], color="red")
+        axes[0].set_title(f"Original Boxplot: {col}")
+
+        ipp.sns.boxplot(x=df_selected_3[col], ax=axes[1], color="green")
+        axes[1].set_title(f"Winsorized Boxplot: {col}")
+
+        ipp.plt.show()
+
+
+    try:
+        with open(ipp.json_file_path, "r") as file:
+            status_data = ipp.json.load(file)
+    except FileNotFoundError:
+        status_data = {}
+
+    # Update JSON for moderate skew
+    if transformed_features:
+        status_data["pre_processing"]["Skew"]["Moderate"]["handling"] = True
+        status_data["pre_processing"]["Skew"]["Moderate"]["features"] = transformed_features
+
+    # Write the updated JSON back to file
+    with open(ipp.json_file_path, "w") as file:
+        ipp.json.dump(status_data, file, indent=4)
+
+    print("\n✅ Completed Winsorization for Moderately Skewed Features.")
+    return df_selected_3
+## End of skewed features transformation

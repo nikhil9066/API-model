@@ -27,13 +27,14 @@ def initial_Check():
 def jsonCheck():
     try:
         json_data = {
-            "pre_check": {"Cache": False, "Model_dir": False, "data_dir": False , "json_dump": False},
-            "load_data": {"csv": False, "excel": False, "other": False},
-            "pre_processing": {"null_handling": False, "outliers": {"detection": False}, "CFS": {"feature_selection": False}},
-            "modeling": {},
-            "hyperparameter_tuning": {"grid_search": False, "random_search": False},
-            "final_checks": {"evaluate_performance": False, "check_overfitting": False, "check_generalization": False}
-        }
+                    "pre_check": { "Cache": False, "Model_dir": False, "data_dir": False, "json_dump": False},
+                    "load_data": { "csv": False, "excel": False, "other": False },
+                    "pre_processing": { "null_handling": False, "outliers": { "detection": False }, "CFS": { "feature_selection": False },
+                        "Skew": { "High": { "handling": False, "features": [] }, "Moderate": { "handling": False, "features": [] }, "Low": { "handling": False, "features": []}}},
+                    "modeling": {},
+                    "hyperparameter_tuning": { "grid_search": False, "random_search": False },
+                    "final_checks": { "evaluate_performance": False, "check_overfitting": False, "check_generalization": False}
+                    }
 
         # Ensure model directory exists before saving JSON
         if not os.path.exists(model_dir):
