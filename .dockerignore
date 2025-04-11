@@ -1,0 +1,14 @@
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+*.git
+*.idea
+*.vscode
+*.pytest_cache
+*.tox
+*.coverage
+*.env
