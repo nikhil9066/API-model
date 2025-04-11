@@ -1,0 +1,187 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Data Chatbot</title>
+    <style>
+        body { font-family: Arial; margin: 2em; }
+        input { width: 300px; padding: 8px; }
+        button { padding: 8px 12px; }
+        #responseArea img { max-width: 600px; margin-top: 1em; }
+        #responseArea p { white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h2>Ask your data chatbot anything:</h2>
+    <form id="chatForm">
+        <input type="text" id="queryInput" placeholder="e.g. Show a plot of housing prices" />
+        <button type="submit">Ask</button>
+    </form>
+
+    <div id="responseArea"></div>
+
+    <script>
+        const form = document.getElementById("chatForm");
+        const input = document.getElementById("queryInput");
+        const responseArea = document.getElementById("responseArea");
+
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const query = input.value.trim();
+            if (!query) return;
+
+            responseArea.innerHTML = "Thinking... 🤖";
+
+            const res = await fetch("/ask", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ query }),
+            });
+
+            const data = await res.json();
+
+            if (data.type === "text") {
+                responseArea.innerHTML = `<p>${data.result}</p>`;
+            } else if (data.type === "plot") {
+                responseArea.innerHTML = `<img src="${data.result}" alt="Plot result">`;
+            } else {
+                responseArea.innerHTML = `<p style="color:red;">${data.result}</p>`;
+            }
+
+            input.value = "";
+        };
+    </script>
+</body>
+</html> -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Data Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f0f2f5;
+        }
+
+        .chat-container {
+            background: #ffffff;
+            padding: 2em;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        h2 {
+            margin-bottom: 1em;
+            color: #333;
+        }
+
+        form {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        input {
+            width: 70%;
+            padding: 10px 12px;
+            font-size: 16px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+        button {
+            padding: 10px 16px;
+            font-size: 16px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        #responseArea {
+            margin-top: 1.5em;
+        }
+
+        #responseArea img {
+            max-width: 100%;
+            margin-top: 1em;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #responseArea p {
+            white-space: pre-wrap;
+            font-size: 16px;
+            color: #333;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <h2>Ask your data chatbot anything:</h2>
+        <form id="chatForm">
+            <input type="text" id="queryInput" placeholder="e.g. Show a plot of housing prices" />
+            <button type="submit">Ask</button>
+        </form>
+        <div id="responseArea"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById("chatForm");
+        const input = document.getElementById("queryInput");
+        const responseArea = document.getElementById("responseArea");
+
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const query = input.value.trim();
+            if (!query) return;
+
+            responseArea.innerHTML = "Thinking... 🤖";
+
+            const res = await fetch("/ask", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ query }),
+            });
+
+            const data = await res.json();
+
+            if (data.type === "text") {
+                responseArea.innerHTML = `<p>${data.result}</p>`;
+            } else if (data.type === "plot") {
+                responseArea.innerHTML = `<img src="${data.result}" alt="Plot result">`;
+            } else {
+                responseArea.innerHTML = `<p style="color:red;">${data.result}</p>`;
+            }
+
+            input.value = "";
+        };
+    </script>
+</body>
+</html>
