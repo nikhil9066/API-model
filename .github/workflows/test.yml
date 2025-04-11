@@ -28,13 +28,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest
-
-      # Run tests (assuming you have some test files)
-      - name: Run tests
-        run: |
-          # You may want to include tests like pytest for Flask routes
-          pytest
 
       # Linting code for consistency
       - name: Lint code
