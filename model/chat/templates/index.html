@@ -175,7 +175,9 @@
             if (data.type === "text") {
                 responseArea.innerHTML = `<p>${data.result}</p>`;
             } else if (data.type === "plot") {
-                responseArea.innerHTML = `<img src="${data.result}" alt="Plot result">`;
+                const timestamp = new Date().getTime();
+                responseArea.innerHTML = `<img src="${data.result}?t=${timestamp}" alt="Plot result">`;
+
             } else {
                 responseArea.innerHTML = `<p style="color:red;">${data.result}</p>`;
             }
