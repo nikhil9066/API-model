@@ -1,20 +1,20 @@
 
 # 💬 Chat App — Lightweight LLM Interface
 
-This is a simple web-based chatbot built using Python and Flask (or a similar framework) that interacts with a language model engine (LLM). It's part of a larger project and is located in the `model/chat/` directory.
+This is a simple web-based chatbot built using Python and Flask that interacts with a language model engine (LLM). It's part of a larger project and is located in the `model/chat/` directory.
 
 ---
 
 ## 📂 Project Structure
 
 ```
-model/chat/
+chat/
 ├── app.py              # Main app entry point
 ├── llm_engine.py       # Handles LLM interaction logic
 ├── requirements.txt    # Dependencies specific to the chat app
-├── Dockerfile          # Docker configuration file
-├── docker-compose.yml  # Optional Docker Compose file (for multi-container setups)
-├── static/             # Static assets (CSS, JS)
+├── setup_and_run.sh    # Script to setup, launch and clean the app
+├── chat_history.json   # File to store interaction history
+├── static/             # Static assets (e.g., plots)
 └── templates/
     └── index.html      # Chat interface template
 ```
@@ -23,116 +23,72 @@ model/chat/
 
 ## 🚀 Getting Started
 
-Follow these steps to install dependencies and run the chat app both **locally** or **on Docker**.
+### ✅ One-Step Setup & Run
 
-### 1. Navigate to the Chat App Directory
-
-```bash
-cd model/chat
-```
-
-### 2. (Optional) Create and Activate a Virtual Environment
+Run the following command inside the `chat/` directory:
 
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scriptsctivate
+bash setup_and_run.sh
 ```
 
-### 3. Install Dependencies
+This script will:
 
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Run the App
-
-- **Locally**: After installing dependencies, you can run the app directly using Flask:
-
-  ```bash
-  python app.py
-  ```
-
-  Once running, open your browser and visit:
-
-  ```
-  http://127.0.0.1:5000/
-  ```
-
-- **Using Docker**: If you prefer to run the app inside a container, use the following steps.
-
-  1. Build the Docker image:
-
-      ```bash
-      docker build -t my-python-app .
-      ```
-
-  2. Run the Docker container:
-
-      ```bash
-      docker run -p 5000:5000 my-python-app
-      ```
-
-  After the container is up and running, access the app at:
-
-  ```
-  http://127.0.0.1:5000/
-  ```
+1. Check if Python is installed (and prompt installation if not).
+2. Set up a virtual environment.
+3. Install dependencies.
+4. Start the Flask server.
+5. Open `http://127.0.0.1:5000/` in your browser.
+6. Press ENTER anytime to:
+   - Kill the server.
+   - Clear chat history and static files.
+   - Delete `__pycache__`, virtual environment, and clean up.
 
 ---
 
 ## 🧠 How It Works
 
-- `app.py` sets up a web server and routes requests.
-- `llm_engine.py` manages communication with a language model (e.g., OpenAI, Ollama, etc.).
-- `index.html` provides the browser-based chat interface.
+- `app.py`: Launches a web server and manages routes.
+- `llm_engine.py`: Communicates with the language model.
+- `setup_and_run.sh`: Automates setup, run, and teardown of the app.
 
 ---
 
-## ⚙️ Configuration
+## ⚙️ LLM Configuration
 
-Make sure to set up your LLM engine configuration in `llm_engine.py`. This may include:
-
-- API keys for services like OpenAI
-- Local endpoints for models like Ollama or LLaMA.cpp
-
-### Example (OpenAI):
-
-```python
-import openai
-openai.api_key = "your-api-key"
-```
+Update the `llm_engine.py` file to configure your model (e.g., OpenAI, Ollama).
 
 ### Example (Ollama):
 
 ```python
-response = requests.post("http://localhost:11434/api/generate", json={
-    "model": "llama3",
-    "prompt": "Hello!",
-    "stream": False
-})
+import ollama
+
+response = ollama.chat(model="llama3", messages=[
+    {"role": "user", "content": "Hello!"}
+])
 ```
+
+Make sure you have Ollama installed and running locally: https://ollama.com
 
 ---
 
 ## ✅ Example Use
 
-1. Start the server (locally or via Docker).
-2. Go to `http://127.0.0.1:5000/`
-3. Type your message and hit "Send".
-4. Get responses directly from the LLM.
+1. Run `bash setup_and_run.sh`
+2. Chat with the LLM at `http://127.0.0.1:5000/`
+3. View responses and plots based on your dataset.
 
 ---
 
 ## 🛠 Requirements
 
 - Python 3.7 or higher
-- All Python dependencies listed in `requirements.txt`
-- Docker (if running the app in a container)
+- Ollama (if using a local model)
+- Bash shell (for running the script on Mac/Linux)
 
 ---
 
 ## 📬 Feedback & Contributions
 
-Feel free to open issues or submit pull requests to improve the app or add support for more LLM backends.
+Feel free to open issues or submit pull requests to improve the app or add support for other LLMs.
 
 ---
