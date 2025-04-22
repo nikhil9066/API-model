@@ -12,6 +12,7 @@ import json
 import os
 import sys
 import warnings
+import plotly
 
 # Importing libraries for statistical modeling and machine learning
 from sklearn.linear_model import LinearRegression
