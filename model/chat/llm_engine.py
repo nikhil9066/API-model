@@ -5,6 +5,7 @@ import re
 import io
 import contextlib
 import os
+import json
 
 import matplotlib
 matplotlib.use("Agg")  # Use a non-GUI backend suitable for servers
@@ -23,6 +24,11 @@ column_string = " and the sample dataset looks like this:\n"
 sample = df.head(3)
 
 pre_information = basic_info + ", ".join(df_columns_list) + column_string + sample.to_string(index=False)
+
+def export_chat_history(filename="chat_history.json"):
+    # Export chat history to a JSON file
+    with open(filename, "w") as f:
+        json.dump(chat_history, f, indent=4)
 
 def wrap_prompt(user_input):
     """
@@ -82,11 +88,13 @@ def call_llm(prompt):
     try:
         response = ollama.chat(
             model="llama3.2",  # Use the local LLM model you downloaded
-            messages=chat_history
+            messages=chat_history,
+            options={"temperature": 0.1}
         )
 
         code = response['message']['content']
         chat_history.append({"role": "assistant", "content": code})
+        export_chat_history()
         return code
     except Exception as e:
         # If an error occurs, simply move on and do not add the funny message

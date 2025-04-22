@@ -1,0 +1,122 @@
+[
+    {
+        "role": "user",
+        "content": "\n        \nYou are a Python data analyst. The dataframe `df` has already been loaded and it contains the following columns:\ncrim, zn, indus, chas, nox, rm, age, dis, rad, tax, ptratio, lstat, medv and the sample dataset looks like this:\n   crim   zn  indus  chas   nox    rm  age    dis  rad  tax  ptratio  lstat  medv\n0.00632 18.0   2.31     0 0.538 6.575 65.2 4.0900    1  296     15.3   4.98  24.0\n0.02731  0.0   7.07     0 0.469 6.421 78.9 4.9671    2  242     17.8   9.14  21.6\n0.02729  0.0   7.07     0 0.469 7.185 61.1 4.9671    2  242     17.8   4.03  34.7\n\n        User asked: \"summary statistics of the dataset\"\n\n        Write Python code using `df` to return relevant descriptive statistics or perform the analysis requested.\n        For example, use `df.describe()`, `df.info()`, or `df.dtypes` as appropriate.\n        DO NOT create plots or figures unless the user explicitly asks for one.\n        Only return the code.\n        "
+    },
+    {
+        "role": "assistant",
+        "content": "```python\nprint(df.describe())\n```\n\nThis will provide a summary of the central tendency and dispersion of each numerical column in the dataframe."
+    },
+    {
+        "role": "user",
+        "content": "\n        \nYou are a Python data analyst. The dataframe `df` has already been loaded and it contains the following columns:\ncrim, zn, indus, chas, nox, rm, age, dis, rad, tax, ptratio, lstat, medv and the sample dataset looks like this:\n   crim   zn  indus  chas   nox    rm  age    dis  rad  tax  ptratio  lstat  medv\n0.00632 18.0   2.31     0 0.538 6.575 65.2 4.0900    1  296     15.3   4.98  24.0\n0.02731  0.0   7.07     0 0.469 6.421 78.9 4.9671    2  242     17.8   9.14  21.6\n0.02729  0.0   7.07     0 0.469 7.185 61.1 4.9671    2  242     17.8   4.03  34.7\n\n        User asked: \"Plot the histogram of the 'CRIM' column?\"\n\n        Write Python code using `df`. If it\u2019s a plot, use matplotlib and save it to 'static/plot.png'. \n        If it\u2019s just a textual output, assign it to `output = ...` using `to_string()` if it\u2019s a DataFrame.\n\n        DO NOT use print(). DO NOT use df.to_png().\n        Only do what the user asked \u2014 do not add extra visualizations or summaries unless explicitly requested.\n        Only return the code.\n        "
+    },
+    {
+        "role": "assistant",
+        "content": "```python\nimport matplotlib.pyplot as plt\n\ndf['crim'].hist()\nplt.savefig('static/plot.png')\n```"
+    },
+    {
+        "role": "user",
+        "content": "\n        \nYou are a Python data analyst. The dataframe `df` has already been loaded and it contains the following columns:\ncrim, zn, indus, chas, nox, rm, age, dis, rad, tax, ptratio, lstat, medv and the sample dataset looks like this:\n   crim   zn  indus  chas   nox    rm  age    dis  rad  tax  ptratio  lstat  medv\n0.00632 18.0   2.31     0 0.538 6.575 65.2 4.0900    1  296     15.3   4.98  24.0\n0.02731  0.0   7.07     0 0.469 6.421 78.9 4.9671    2  242     17.8   9.14  21.6\n0.02729  0.0   7.07     0 0.469 7.185 61.1 4.9671    2  242     17.8   4.03  34.7\n\n        User asked: \"provide the correlation matrix between all numerical columns in the dataset.\"\n\n        Write Python code using `df` to return relevant data or perform the requested analysis.\n        DO NOT create plots or figures unless the user explicitly asks for one.\n        Only return the code.\n        "
+    },
+    {
+        "role": "assistant",
+        "content": "```python\nimport pandas as pd\n\ncorr_matrix = df[['crim', 'zn', 'indus', 'nox', 'rm', 'age', 'dis', 'rad', 'tax', 'ptratio', 'lstat', 'medv']].corr()\nprint(corr_matrix.to_string())\n```"
+    },
+    {
+        "role": "user",
+        "content": "\n        \nYou are a Python data analyst. The dataframe `df` has already been loaded and it contains the following columns:\ncrim, zn, indus, chas, nox, rm, age, dis, rad, tax, ptratio, lstat, medv and the sample dataset looks like this:\n   crim   zn  indus  chas   nox    rm  age    dis  rad  tax  ptratio  lstat  medv\n0.00632 18.0   2.31     0 0.538 6.575 65.2 4.0900    1  296     15.3   4.98  24.0\n0.02731  0.0   7.07     0 0.469 6.421 78.9 4.9671    2  242     17.8   9.14  21.6\n0.02729  0.0   7.07     0 0.469 7.185 61.1 4.9671    2  242     17.8   4.03  34.7\n\n        User asked: \"Visualize the distribution of 'NOX' and 'TAX' using a boxplot.\"\n\n        Write Python code using `df`. If it\u2019s a plot, use matplotlib and save it to 'static/plot.png'. \n        If it\u2019s just a textual output, assign it to `output = ...` using `to_string()` if it\u2019s a DataFrame.\n\n        DO NOT use print(). DO NOT use df.to_png().\n        Only do what the user asked \u2014 do not add extra visualizations or summaries unless explicitly requested.\n        Only return the code.\n        "
+    },
+    {
+        "role": "assistant",
+        "content": "```python\nimport matplotlib.pyplot as plt\n\ndf[['nox', 'tax']].boxplot()\nplt.savefig('static/plot.png')\n```"
+    },
+    {
+        "role": "user",
+        "content": "\n        \nYou are a Python data analyst. The dataframe `df` has already been loaded and it contains the following columns:\ncrim, zn, indus, chas, nox, rm, age, dis, rad, tax, ptratio, lstat, medv and the sample dataset looks like this:\n   crim   zn  indus  chas   nox    rm  age    dis  rad  tax  ptratio  lstat  medv\n0.00632 18.0   2.31     0 0.538 6.575 65.2 4.0900    1  296     15.3   4.98  24.0\n0.02731  0.0   7.07     0 0.469 6.421 78.9 4.9671    2  242     17.8   9.14  21.6\n0.02729  0.0   7.07     0 0.469 7.185 61.1 4.9671    2  242     17.8   4.03  34.7\n\n        User asked: \"Visualize the distribution of 'NOX' and 'TAX' using a box plot.\"\n\n        Write Python code using `df`. If it\u2019s a plot, use matplotlib and save it to 'static/plot.png'. \n        If it\u2019s just a textual output, assign it to `output = ...` using `to_string()` if it\u2019s a DataFrame.\n\n        DO NOT use print(). DO NOT use df.to_png().\n        Only do what the user asked \u2014 do not add extra visualizations or summaries unless explicitly requested.\n        Only return the code.\n        "
+    },
+    {
+        "role": "assistant",
+        "content": "```python\nimport matplotlib.pyplot as plt\n\ndf[['nox', 'tax']].boxplot()\nplt.savefig('static/plot.png')\n```"
+    },
+    {
+        "role": "user",
+        "content": "\n        \nYou are a Python data analyst. The dataframe `df` has already been loaded and it contains the following columns:\ncrim, zn, indus, chas, nox, rm, age, dis, rad, tax, ptratio, lstat, medv and the sample dataset looks like this:\n   crim   zn  indus  chas   nox    rm  age    dis  rad  tax  ptratio  lstat  medv\n0.00632 18.0   2.31     0 0.538 6.575 65.2 4.0900    1  296     15.3   4.98  24.0\n0.02731  0.0   7.07     0 0.469 6.421 78.9 4.9671    2  242     17.8   9.14  21.6\n0.02729  0.0   7.07     0 0.469 7.185 61.1 4.9671    2  242     17.8   4.03  34.7\n\n        User asked: \"Visualize the Heat map for the correlation matrix\"\n\n        Write Python code using `df`. If it\u2019s a plot, use matplotlib and save it to 'static/plot.png'. \n        If it\u2019s just a textual output, assign it to `output = ...` using `to_string()` if it\u2019s a DataFrame.\n\n        DO NOT use print(). DO NOT use df.to_png().\n        Only do what the user asked \u2014 do not add extra visualizations or summaries unless explicitly requested.\n        Only return the code.\n        "
+    },
+    {
+        "role": "assistant",
+        "content": "```python\nimport matplotlib.pyplot as plt\nimport seaborn as sns\n\ncorr_matrix = df[['nox', 'tax']].corr()\nsns.heatmap(corr_matrix, annot=True, cmap='coolwarm')\nplt.savefig('static/plot.png')\n```"
+    },
+    {
+        "role": "user",
+        "content": "\n        \nYou are a Python data analyst. The dataframe `df` has already been loaded and it contains the following columns:\ncrim, zn, indus, chas, nox, rm, age, dis, rad, tax, ptratio, lstat, medv and the sample dataset looks like this:\n   crim   zn  indus  chas   nox    rm  age    dis  rad  tax  ptratio  lstat  medv\n0.00632 18.0   2.31     0 0.538 6.575 65.2 4.0900    1  296     15.3   4.98  24.0\n0.02731  0.0   7.07     0 0.469 6.421 78.9 4.9671    2  242     17.8   9.14  21.6\n0.02729  0.0   7.07     0 0.469 7.185 61.1 4.9671    2  242     17.8   4.03  34.7\n\n        User asked: \"Visualize the correlation matrix\"\n\n        Write Python code using `df`. If it\u2019s a plot, use matplotlib and save it to 'static/plot.png'. \n        If it\u2019s just a textual output, assign it to `output = ...` using `to_string()` if it\u2019s a DataFrame.\n\n        DO NOT use print(). DO NOT use df.to_png().\n        Only do what the user asked \u2014 do not add extra visualizations or summaries unless explicitly requested.\n        Only return the code.\n        "
+    },
+    {
+        "role": "assistant",
+        "content": "```python\nimport matplotlib.pyplot as plt\nimport seaborn as sns\n\ncorr_matrix = df[['nox', 'tax']].corr()\nsns.heatmap(corr_matrix, annot=True, cmap='coolwarm')\nplt.savefig('static/plot.png')\n```"
+    },
+    {
+        "role": "user",
+        "content": "\n        \nYou are a Python data analyst. The dataframe `df` has already been loaded and it contains the following columns:\ncrim, zn, indus, chas, nox, rm, age, dis, rad, tax, ptratio, lstat, medv and the sample dataset looks like this:\n   crim   zn  indus  chas   nox    rm  age    dis  rad  tax  ptratio  lstat  medv\n0.00632 18.0   2.31     0 0.538 6.575 65.2 4.0900    1  296     15.3   4.98  24.0\n0.02731  0.0   7.07     0 0.469 6.421 78.9 4.9671    2  242     17.8   9.14  21.6\n0.02729  0.0   7.07     0 0.469 7.185 61.1 4.9671    2  242     17.8   4.03  34.7\n\n        User asked: \"plot to check the skewness of the data\"\n\n        Write Python code using `df`. If it\u2019s a plot, use matplotlib and save it to 'static/plot.png'. \n        If it\u2019s just a textual output, assign it to `output = ...` using `to_string()` if it\u2019s a DataFrame.\n\n        DO NOT use print(). DO NOT use df.to_png().\n        Only do what the user asked \u2014 do not add extra visualizations or summaries unless explicitly requested.\n        Only return the code.\n        "
+    },
+    {
+        "role": "assistant",
+        "content": "```python\nimport matplotlib.pyplot as plt\nimport seaborn as sns\nimport numpy as np\n\nsns.set()\n\nplt.figure(figsize=(10,6))\nfor col in df.columns:\n    plt.subplot(2, len(df.columns), len(df.columns)+1)\n    sns.histplot(df[col], kde=True)\n    plt.title(col)\n    plt.xlabel('Value')\n    plt.ylabel('Frequency')\n\nplt.tight_layout()\nplt.savefig('static/plot.png')\n```"
+    },
+    {
+        "role": "user",
+        "content": "\n        \nYou are a Python data analyst. The dataframe `df` has already been loaded and it contains the following columns:\ncrim, zn, indus, chas, nox, rm, age, dis, rad, tax, ptratio, lstat, medv and the sample dataset looks like this:\n   crim   zn  indus  chas   nox    rm  age    dis  rad  tax  ptratio  lstat  medv\n0.00632 18.0   2.31     0 0.538 6.575 65.2 4.0900    1  296     15.3   4.98  24.0\n0.02731  0.0   7.07     0 0.469 6.421 78.9 4.9671    2  242     17.8   9.14  21.6\n0.02729  0.0   7.07     0 0.469 7.185 61.1 4.9671    2  242     17.8   4.03  34.7\n\n        User asked: \"list all the columns in the data\"\n\n        Write Python code using `df` to return relevant data or perform the requested analysis.\n        DO NOT create plots or figures unless the user explicitly asks for one.\n        Only return the code.\n        "
+    },
+    {
+        "role": "assistant",
+        "content": "```python\nprint(df.columns.to_list())\n```"
+    },
+    {
+        "role": "user",
+        "content": "\n        \nYou are a Python data analyst. The dataframe `df` has already been loaded and it contains the following columns:\ncrim, zn, indus, chas, nox, rm, age, dis, rad, tax, ptratio, lstat, medv and the sample dataset looks like this:\n   crim   zn  indus  chas   nox    rm  age    dis  rad  tax  ptratio  lstat  medv\n0.00632 18.0   2.31     0 0.538 6.575 65.2 4.0900    1  296     15.3   4.98  24.0\n0.02731  0.0   7.07     0 0.469 6.421 78.9 4.9671    2  242     17.8   9.14  21.6\n0.02729  0.0   7.07     0 0.469 7.185 61.1 4.9671    2  242     17.8   4.03  34.7\n\n        User asked: \"What do these columns stand for?\"\n\n        Write Python code using `df` to return relevant data or perform the requested analysis.\n        DO NOT create plots or figures unless the user explicitly asks for one.\n        Only return the code.\n        "
+    },
+    {
+        "role": "assistant",
+        "content": "```python\nprint(df.head())\n```"
+    },
+    {
+        "role": "user",
+        "content": "\n        \nYou are a Python data analyst. The dataframe `df` has already been loaded and it contains the following columns:\ncrim, zn, indus, chas, nox, rm, age, dis, rad, tax, ptratio, lstat, medv and the sample dataset looks like this:\n   crim   zn  indus  chas   nox    rm  age    dis  rad  tax  ptratio  lstat  medv\n0.00632 18.0   2.31     0 0.538 6.575 65.2 4.0900    1  296     15.3   4.98  24.0\n0.02731  0.0   7.07     0 0.469 6.421 78.9 4.9671    2  242     17.8   9.14  21.6\n0.02729  0.0   7.07     0 0.469 7.185 61.1 4.9671    2  242     17.8   4.03  34.7\n\n        User asked: \"plot Co relation matrix\"\n\n        Write Python code using `df`. If it\u2019s a plot, use matplotlib and save it to 'static/plot.png'. \n        If it\u2019s just a textual output, assign it to `output = ...` using `to_string()` if it\u2019s a DataFrame.\n\n        DO NOT use print(). DO NOT use df.to_png().\n        Only do what the user asked \u2014 do not add extra visualizations or summaries unless explicitly requested.\n        Only return the code.\n        "
+    },
+    {
+        "role": "assistant",
+        "content": "```python\nimport matplotlib.pyplot as plt\nimport seaborn as sns\n\ncorr_matrix = df[['crim', 'zn', 'indus', 'chas', 'nox', 'rm', 'age', 'dis', 'rad', 'tax', 'ptratio', 'lstat', 'medv']].corr()\nplt.figure(figsize=(10,8))\nsns.heatmap(corr_matrix, annot=True, cmap='coolwarm')\nplt.savefig('static/plot.png')\n```"
+    },
+    {
+        "role": "user",
+        "content": "\n        \nYou are a Python data analyst. The dataframe `df` has already been loaded and it contains the following columns:\ncrim, zn, indus, chas, nox, rm, age, dis, rad, tax, ptratio, lstat, medv and the sample dataset looks like this:\n   crim   zn  indus  chas   nox    rm  age    dis  rad  tax  ptratio  lstat  medv\n0.00632 18.0   2.31     0 0.538 6.575 65.2 4.0900    1  296     15.3   4.98  24.0\n0.02731  0.0   7.07     0 0.469 6.421 78.9 4.9671    2  242     17.8   9.14  21.6\n0.02729  0.0   7.07     0 0.469 7.185 61.1 4.9671    2  242     17.8   4.03  34.7\n\n        User asked: \"Plot Boxplot for nox\"\n\n        Write Python code using `df`. If it\u2019s a plot, use matplotlib and save it to 'static/plot.png'. \n        If it\u2019s just a textual output, assign it to `output = ...` using `to_string()` if it\u2019s a DataFrame.\n\n        DO NOT use print(). DO NOT use df.to_png().\n        Only do what the user asked \u2014 do not add extra visualizations or summaries unless explicitly requested.\n        Only return the code.\n        "
+    },
+    {
+        "role": "assistant",
+        "content": "```python\nimport matplotlib.pyplot as plt\n\nplt.figure(figsize=(8,6))\nsns.boxplot(df['nox'])\nplt.savefig('static/plot.png')\n```"
+    },
+    {
+        "role": "user",
+        "content": "\n        \nYou are a Python data analyst. The dataframe `df` has already been loaded and it contains the following columns:\ncrim, zn, indus, chas, nox, rm, age, dis, rad, tax, ptratio, lstat, medv and the sample dataset looks like this:\n   crim   zn  indus  chas   nox    rm  age    dis  rad  tax  ptratio  lstat  medv\n0.00632 18.0   2.31     0 0.538 6.575 65.2 4.0900    1  296     15.3   4.98  24.0\n0.02731  0.0   7.07     0 0.469 6.421 78.9 4.9671    2  242     17.8   9.14  21.6\n0.02729  0.0   7.07     0 0.469 7.185 61.1 4.9671    2  242     17.8   4.03  34.7\n\n        User asked: \"Visualize the distribution of 'NOX' and 'TAX' using a boxplot.\"\n\n        Write Python code using `df`. If it\u2019s a plot, use matplotlib and save it to 'static/plot.png'. \n        If it\u2019s just a textual output, assign it to `output = ...` using `to_string()` if it\u2019s a DataFrame.\n\n        DO NOT use print(). DO NOT use df.to_png().\n        Only do what the user asked \u2014 do not add extra visualizations or summaries unless explicitly requested.\n        Only return the code.\n        "
+    },
+    {
+        "role": "assistant",
+        "content": "```python\nimport matplotlib.pyplot as plt\nimport seaborn as sns\n\nplt.figure(figsize=(8,6))\nsns.boxplot([df['nox'], df['tax']])\nplt.savefig('static/plot.png')\n```"
+    },
+    {
+        "role": "user",
+        "content": "\n        \nYou are a Python data analyst. The dataframe `df` has already been loaded and it contains the following columns:\ncrim, zn, indus, chas, nox, rm, age, dis, rad, tax, ptratio, lstat, medv and the sample dataset looks like this:\n   crim   zn  indus  chas   nox    rm  age    dis  rad  tax  ptratio  lstat  medv\n0.00632 18.0   2.31     0 0.538 6.575 65.2 4.0900    1  296     15.3   4.98  24.0\n0.02731  0.0   7.07     0 0.469 6.421 78.9 4.9671    2  242     17.8   9.14  21.6\n0.02729  0.0   7.07     0 0.469 7.185 61.1 4.9671    2  242     17.8   4.03  34.7\n\n        User asked: \"plot scatter plot for the data\"\n\n        Write Python code using `df`. If it\u2019s a plot, use matplotlib and save it to 'static/plot.png'. \n        If it\u2019s just a textual output, assign it to `output = ...` using `to_string()` if it\u2019s a DataFrame.\n\n        DO NOT use print(). DO NOT use df.to_png().\n        Only do what the user asked \u2014 do not add extra visualizations or summaries unless explicitly requested.\n        Only return the code.\n        "
+    },
+    {
+        "role": "assistant",
+        "content": "```python\nimport matplotlib.pyplot as plt\n\nplt.figure(figsize=(8,6))\nsns.scatterplot(x='age', y='medv', data=df)\nplt.savefig('static/plot.png')\n```"
+    },
+    {
+        "role": "user",
+        "content": "\n        \nYou are a Python data analyst. The dataframe `df` has already been loaded and it contains the following columns:\ncrim, zn, indus, chas, nox, rm, age, dis, rad, tax, ptratio, lstat, medv and the sample dataset looks like this:\n   crim   zn  indus  chas   nox    rm  age    dis  rad  tax  ptratio  lstat  medv\n0.00632 18.0   2.31     0 0.538 6.575 65.2 4.0900    1  296     15.3   4.98  24.0\n0.02731  0.0   7.07     0 0.469 6.421 78.9 4.9671    2  242     17.8   9.14  21.6\n0.02729  0.0   7.07     0 0.469 7.185 61.1 4.9671    2  242     17.8   4.03  34.7\n\n        User asked: \"plot scatter plot for 'dis' and 'medv'\"\n\n        Write Python code using `df`. If it\u2019s a plot, use matplotlib and save it to 'static/plot.png'. \n        If it\u2019s just a textual output, assign it to `output = ...` using `to_string()` if it\u2019s a DataFrame.\n\n        DO NOT use print(). DO NOT use df.to_png().\n        Only do what the user asked \u2014 do not add extra visualizations or summaries unless explicitly requested.\n        Only return the code.\n        "
+    },
+    {
+        "role": "assistant",
+        "content": "```python\nimport matplotlib.pyplot as plt\nimport seaborn as sns\n\nplt.figure(figsize=(8,6))\nsns.scatterplot(x='dis', y='medv', data=df)\nplt.savefig('static/plot.png')\n```"
+    }
+]
