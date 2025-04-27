@@ -1,62 +1,9 @@
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Data Chatbot</title>
-    <style>
-        body { font-family: Arial; margin: 2em; }
-        input { width: 300px; padding: 8px; }
-        button { padding: 8px 12px; }
-        #responseArea img { max-width: 600px; margin-top: 1em; }
-        #responseArea p { white-space: pre-wrap; }
-    </style>
-</head>
-<body>
-    <h2>Ask your data chatbot anything:</h2>
-    <form id="chatForm">
-        <input type="text" id="queryInput" placeholder="e.g. Show a plot of housing prices" />
-        <button type="submit">Ask</button>
-    </form>
-
-    <div id="responseArea"></div>
-
-    <script>
-        const form = document.getElementById("chatForm");
-        const input = document.getElementById("queryInput");
-        const responseArea = document.getElementById("responseArea");
-
-        form.onsubmit = async (e) => {
-            e.preventDefault();
-            const query = input.value.trim();
-            if (!query) return;
-
-            responseArea.innerHTML = "Thinking... 🤖";
-
-            const res = await fetch("/ask", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ query }),
-            });
-
-            const data = await res.json();
-
-            if (data.type === "text") {
-                responseArea.innerHTML = `<p>${data.result}</p>`;
-            } else if (data.type === "plot") {
-                responseArea.innerHTML = `<img src="${data.result}" alt="Plot result">`;
-            } else {
-                responseArea.innerHTML = `<p style="color:red;">${data.result}</p>`;
-            }
-
-            input.value = "";
-        };
-    </script>
-</body>
-</html> -->
-
-
 <!DOCTYPE html>
 <html lang="en">
+<form action="/shutdown" method="POST">
+    <button type="submit">Kill Server</button>
+</form>
+</form>
 <head>
     <meta charset="UTF-8">
     <title>Data Chatbot</title>

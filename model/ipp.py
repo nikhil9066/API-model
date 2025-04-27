@@ -24,6 +24,9 @@ import statsmodels.stats.api as sms
 import statsmodels.stats.diagnostic as smd
 from statsmodels.stats.outliers_influence import variance_inflation_factor
 from statsmodels.stats.diagnostic import het_goldfeldquandt 
+from sklearn.linear_model import Lasso
+from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import r2_score
 
 from scipy import stats
 from scipy.stats import skew

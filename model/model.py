@@ -501,7 +501,7 @@ def Reg_model(df, predictor_variable, name):
     # print("------------------------------------------------------------------")
     
     # Return the results
-    return train_score, test_score, ipp.r2_score(y_test, y_test_pred), model
+    return train_score, test_score, test_score, model
 
 # Function to update the JSON structure with model results
 def interModel(df, predictor_variable, name):
