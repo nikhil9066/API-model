@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 from llm_engine import wrap_prompt, call_llm, run_code  # from your existing code
+import subprocess
+
 
 app = Flask(__name__)
 
@@ -27,6 +29,11 @@ def ask():
         return jsonify({"type": "plot", "result": "/static/plot.png"})
     else:
         return jsonify({"type": "error", "result": result})
+        
+@app.route("/shutdown", methods=["POST"])
+def shutdown():
+    subprocess.Popen(["bash", "shutdown.sh"])
+    return "Shutting down...", 200
 
 if __name__ == "__main__":
     app.run(debug=True)
