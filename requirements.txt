@@ -39,7 +39,7 @@ jupyter_core==5.5.0
 kiwisolver==1.4.4
 lazy_loader==0.3
 MarkupSafe==3.0.2
-matplotlib==3.10.1
+matplotlib>=3.8.4,<3.10
 matplotlib-inline==0.1.6
 narwhals==1.34.1
 nest-asyncio==1.5.8
