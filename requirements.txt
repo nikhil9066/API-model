@@ -285,7 +285,18 @@ trio==0.30.0
     #   trio-websocket
 trio-websocket==0.12.2
     # via selenium
+types-requests==2.32.0.20250328
     # via agbenchmark
+typing-extensions<4.6.0
+    # via
+    #   anyio
+    #   atproto
+    #   bases
+    #   dag-cbor
+    #   fastapi
+    #   ipython
+    #   multiformats
+    #   pydantic
 typing-validation==1.2.12
     # via
     #   bases
