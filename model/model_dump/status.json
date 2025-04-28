@@ -13,30 +13,254 @@
     "pre_processing": {
         "null_handling": false,
         "outliers": {
-            "detection": false
+            "detection": true,
+            "method": "iqr",
+            "outliers_removed": 40
         },
         "CFS": {
-            "feature_selection": false
+            "feature_selection": true,
+            "history": [
+                {
+                    "timestamp": "2025-04-27 22:47:26",
+                    "High_loss": {
+                        "rad": 0.9101
+                    }
+                },
+                {
+                    "timestamp": "2025-04-27 22:47:26",
+                    "lower_threshold": 0.3,
+                    "Low_loss": {
+                        "chas": 0.0971
+                    }
+                },
+                {
+                    "timestamp": "2025-04-27 22:47:26",
+                    "lower_threshold": 0.35,
+                    "Low_loss": {
+                        "chas": 0.0971
+                    }
+                },
+                {
+                    "timestamp": "2025-04-27 22:47:26",
+                    "lower_threshold": 0.4,
+                    "Low_loss": {
+                        "chas": 0.0971
+                    }
+                },
+                {
+                    "timestamp": "2025-04-27 22:47:26",
+                    "lower_threshold": 0.45,
+                    "Low_loss": {
+                        "zn": 0.4362,
+                        "chas": 0.0971,
+                        "dis": 0.4398
+                    }
+                },
+                {
+                    "timestamp": "2025-04-27 22:47:26",
+                    "lower_threshold": 0.5,
+                    "Low_loss": {
+                        "crim": -0.482,
+                        "zn": 0.4362,
+                        "chas": 0.0971,
+                        "dis": 0.4398,
+                        "ptratio": -0.4887
+                    }
+                },
+                {
+                    "timestamp": "2025-04-27 22:47:26",
+                    "lower_threshold": 0.55,
+                    "Low_loss": {
+                        "crim": -0.482,
+                        "zn": 0.4362,
+                        "chas": 0.0971,
+                        "dis": 0.4398,
+                        "rad": -0.5043,
+                        "ptratio": -0.4887
+                    }
+                }
+            ]
         },
         "Skew": {
             "High": {
-                "handling": false,
-                "features": []
+                "handling": true,
+                "features": [
+                    "crim",
+                    "zn",
+                    "dis"
+                ]
             },
             "Moderate": {
-                "handling": false,
-                "features": []
+                "handling": true,
+                "features": [
+                    "nox",
+                    "age",
+                    "rad",
+                    "tax",
+                    "ptratio",
+                    "lstat"
+                ]
             },
             "Low": {
                 "handling": false,
-                "features": []
+                "features": [
+                    "indus",
+                    "rm",
+                    "medv"
+                ]
             }
         }
     },
-    "modeling": {},
+    "modeling": {
+        "raw": {
+            "train": 0.739801993681731,
+            "test": 0.6893967884614722,
+            "r2_score": 0.6893967884614722,
+            "model": "raw_20250427_224726.pkl"
+        },
+        "efficiency": false,
+        "outliers": {
+            "train": 0.7514030047926321,
+            "test": 0.7477564629456128,
+            "r2_score": 0.7477564629456128,
+            "model": "outliers_20250427_224726.pkl"
+        },
+        "LTH_0.3": {
+            "train": 0.7506892512050252,
+            "test": 0.7429717474588526,
+            "r2_score": 0.7429717474588526,
+            "model": "LTH_0.3_20250427_224726.pkl"
+        },
+        "LTH_0.35": {
+            "train": 0.7506892512050252,
+            "test": 0.7429717474588526,
+            "r2_score": 0.7429717474588526,
+            "model": "LTH_0.35_20250427_224726.pkl"
+        },
+        "LTH_0.4": {
+            "train": 0.7506892512050252,
+            "test": 0.7429717474588526,
+            "r2_score": 0.7429717474588526,
+            "model": "LTH_0.4_20250427_224726.pkl"
+        },
+        "LTH_0.45": {
+            "train": 0.7243988380759239,
+            "test": 0.7060787046551034,
+            "r2_score": 0.7060787046551034,
+            "model": "LTH_0.45_20250427_224726.pkl"
+        },
+        "LTH_0.5": {
+            "train": 0.6707649079865328,
+            "test": 0.6726340566919277,
+            "r2_score": 0.6726340566919277,
+            "model": "LTH_0.5_20250427_224726.pkl"
+        },
+        "LTH_0.55": {
+            "train": 0.6701509135019081,
+            "test": 0.6670850446313604,
+            "r2_score": 0.6670850446313604,
+            "model": "LTH_0.55_20250427_224726.pkl"
+        },
+        "High_skew": {
+            "train": 0.7352869828190207,
+            "test": 0.7181137685011099,
+            "r2_score": 0.7181137685011099,
+            "model": "High_skew_20250427_224726.pkl"
+        },
+        "Moderate_skew": {
+            "train": 0.7375739903964982,
+            "test": 0.7301638953107763,
+            "r2_score": 0.7301638953107763,
+            "model": "Moderate_skew_20250427_224727.pkl"
+        },
+        "Scaled_Linear_Model": {
+            "train": 0.7381238830675089,
+            "test": 0.726035785336048,
+            "r2_score": 0.726035785336048,
+            "model": "Scaled_Linear_Model"
+        },
+        "Lasso_model": {
+            "train": 0.6673235786254277,
+            "test": 0.6669480378991592,
+            "r2_score": 0.6669480378991592,
+            "model": "Lasso_model"
+        },
+        "Ridge_model": {
+            "train": 0.7380920151432976,
+            "test": 0.725316016960783,
+            "r2_score": 0.725316016960783,
+            "model": "Ridge_model"
+        },
+        "ElasticNet_model": {
+            "train": 0.6627818024714658,
+            "test": 0.62765669023569,
+            "r2_score": 0.62765669023569,
+            "model": "ElasticNet_model"
+        },
+        "KNeighborsRegressor | Standardized: False": {
+            "train": 0.7429003113266298,
+            "test": 0.6156818824793304,
+            "r2_score": 0.6156818824793304
+        },
+        "KNeighborsRegressor | Standardized: True": {
+            "train": 0.854174924892116,
+            "test": 0.7773386665131938,
+            "r2_score": 0.7773386665131938
+        }
+    },
     "hyperparameter_tuning": {
         "grid_search": false,
-        "random_search": false
+        "random_search": false,
+        "LassoCV_model": {
+            "train": 0.7380873357127788,
+            "test": 0.7258860055606041,
+            "r2_score": 0.7258860055606041,
+            "model": "LassoCV_model",
+            "grid_search": false,
+            "random_search": false
+        },
+        "RidgeCV_model": {
+            "train": 0.7380920151432976,
+            "test": 0.725316016960783,
+            "r2_score": 0.725316016960783,
+            "model": "RidgeCV_model",
+            "grid_search": false,
+            "random_search": false
+        },
+        "ElasticNetCV_model": {
+            "train": 0.737897685295525,
+            "test": 0.7244937556179412,
+            "r2_score": 0.7244937556179412,
+            "model": "ElasticNetCV_model",
+            "grid_search": false,
+            "random_search": false
+        },
+        "KNeighborsRegressor_Tuned | Standardized: False": {
+            "train": 1.0,
+            "test": 0.6990520797886772,
+            "r2_score": 0.6990520797886772,
+            "best_params": {
+                "algorithm": "auto",
+                "n_neighbors": 4,
+                "p": 1,
+                "weights": "distance"
+            },
+            "grid_search": true,
+            "random_search": false
+        },
+        "KNeighborsRegressor_Tuned | Standardized: True": {
+            "train": 1.0,
+            "test": 0.7657717802180388,
+            "r2_score": 0.7657717802180388,
+            "best_params": {
+                "algorithm": "auto",
+                "n_neighbors": 8,
+                "p": 1,
+                "weights": "distance"
+            },
+            "grid_search": true,
+            "random_search": false
+        }
     },
     "final_checks": {
         "evaluate_performance": false,
