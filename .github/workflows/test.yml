@@ -1,20 +1,44 @@
+name: CI for AutoML API
+
+on:
+  push:
+    branches:
+      - "**"  # Trigger on push to any branch
+  pull_request:
+    branches:
+      - main  # Trigger on pull request to the main branch
+
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  test:
+    runs-on: ubuntu-latest  # Use the latest Ubuntu runner
 
     steps:
-      # Checkout code from the repository
-      - name: Checkout repository
-        uses: actions/checkout@v2
+    - name: Check out code
+      uses: actions/checkout@v2  # Check out the repository
 
-      # Set up Python environment
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.9'
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.10'  # Specify the Python version to use
 
-      # Install dependencies from requirements.txt
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+    - name: Install dependencies
+      run: |
+        python -m venv venv  # Create a virtual environment
+        source venv/bin/activate  # Activate the virtual environment
+        pip install -r requirements.txt  # Install dependencies from requirements.txt
+
+    # - name: Run tests
+    #   run: |
+    #     source venv/bin/activate  # Activate the virtual environment again
+    #     # Run tests using pytest or another test runner you prefer
+    #     pytest tests/  # Adjust if you have a different testing directory or framework
+
+    # - name: Linting checks (optional)
+    #   run: |
+    #     source venv/bin/activate  # Activate virtual environment
+    #     flake8 .  # Run linting with flake8 (or another tool like pylint)
+
+    # - name: Upload coverage report (optional)
+    #   uses: codecov/codecov-action@v2
+    #   with:
+    #     token: ${{ secrets.CODECOV_TOKEN }}  # If using codecov for code coverage
