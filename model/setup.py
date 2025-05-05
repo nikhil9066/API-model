@@ -50,23 +50,50 @@ def jsonCheck():
         # print(f"Error saving JSON: {e}")
         return False
     
+# def clean_data_folder():
+#     try:
+#         # Ensure data folder exists
+#         if not os.path.exists(data_folder):
+#             os.makedirs(data_folder)
+
+#         # Clean the data folder by removing all files
+#         for filename in os.listdir(data_folder):
+#             file_path = os.path.join(data_folder, filename)
+#             if os.path.isfile(file_path) or os.path.isdir(file_path):
+#                 ipp.shutil.rmtree(file_path) if os.path.isdir(file_path) else os.remove(file_path)
+
+#         # print(f"Data folder cleaned: {data_folder}")
+#         return True
+#     except Exception as e:
+#         # print(f"Error cleaning data folder: {e}")
+#         return False
+
 def clean_data_folder():
     try:
-        # Ensure data folder exists
+        # Ensure 'data' folder exists and clean it
         if not os.path.exists(data_folder):
             os.makedirs(data_folder)
 
-        # Clean the data folder by removing all files
         for filename in os.listdir(data_folder):
             file_path = os.path.join(data_folder, filename)
             if os.path.isfile(file_path) or os.path.isdir(file_path):
                 ipp.shutil.rmtree(file_path) if os.path.isdir(file_path) else os.remove(file_path)
 
-        # print(f"Data folder cleaned: {data_folder}")
+        # Ensure 'Out_Put' folder inside 'model_dump' exists and clean it
+        output_dir = os.path.join(model_dir, "Out_Put")
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        for filename in os.listdir(output_dir):
+            file_path = os.path.join(output_dir, filename)
+            if os.path.isfile(file_path) or os.path.isdir(file_path):
+                ipp.shutil.rmtree(file_path) if os.path.isdir(file_path) else os.remove(file_path)
+
         return True
     except Exception as e:
-        # print(f"Error cleaning data folder: {e}")
+        # print(f"Error cleaning folders: {e}")
         return False
+
 
 # Clearing cache
 def clear_pycache():
