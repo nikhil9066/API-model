@@ -10,6 +10,7 @@
         "excel": false,
         "other": false
     },
+    "Model_Mind": {},
     "pre_processing": {
         "null_handling": false,
         "outliers": {
