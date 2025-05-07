@@ -29,6 +29,7 @@ def jsonCheck():
         json_data = {
                     "pre_check": { "Cache": False, "Model_dir": False, "data_dir": False, "json_dump": False},
                     "load_data": { "csv": False, "excel": False, "other": False },
+                    "Model_Mind": { },
                     "pre_processing": { "null_handling": False, "outliers": { "detection": False }, "CFS": { "feature_selection": False },
                         "Skew": { "High": { "handling": False, "features": [] }, "Moderate": { "handling": False, "features": [] }, "Low": { "handling": False, "features": []}}},
                     "modeling": {},

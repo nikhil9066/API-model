@@ -44,6 +44,7 @@ from plot import *  # Import visualization functions
 ### from regression import *  # Import regression models
 # from preprocessing_pipeline import *  # Import additional preprocessing
 from setup import *  # Import setup functions
+from autoregressx import *  # Import autoregressive models
 
 # Set plot style
 plt.style.use('ggplot')
@@ -53,3 +54,38 @@ plt.style.use('ggplot')
 model_dir = "model_dump"
 json_file_path = os.path.join(model_dir, "status.json")
 data_folder = "data"
+
+
+from cryptography.fernet import Fernet
+
+def decrypt_model_mind_section(encrypted_dict, key):
+    """
+    Decrypts an encrypted 'Model_Mind' section using the provided key.
+    
+    Args:
+        encrypted_dict (dict): The dictionary with encrypted values (actual_model and predicted_model).
+        key (str): The base64-encoded Fernet key used for encryption.
+
+    Returns:
+        dict: Decrypted 'Model_Mind' section with plain-text values.
+    """
+    fernet = Fernet(key.encode())
+    
+    def decrypt_entry(entry_list, keys_to_decrypt):
+        decrypted = []
+        for entry in entry_list:
+            decrypted_entry = {}
+            for k, v in entry.items():
+                if k in keys_to_decrypt:
+                    decrypted_entry[k] = fernet.decrypt(v.encode()).decode()
+                else:
+                    decrypted_entry[k] = v
+            decrypted.append(decrypted_entry)
+        return decrypted
+
+    decrypted_dict = {
+        "actual_model": decrypt_entry(encrypted_dict.get("actual_model", []), ["model", "r2_score"]),
+        "predicted_model": decrypt_entry(encrypted_dict.get("predicted_model", []), ["model", "confidence_score"])
+    }
+    
+    return decrypted_dict
