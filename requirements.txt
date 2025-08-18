@@ -1,10 +1,88 @@
-Flask==2.3.3
-pandas==2.0.1
-matplotlib==3.7.1
-numpy==1.24.2
-seaborn==0.12.2
-plotly==5.15.0
-scikit-learn==1.2.2
-statsmodels==0.14.0
-scipy==1.10.0
-catboost==1.2.2
+# Phase 1 AutoML Pipeline Requirements
+
+# Core Data Science Libraries
+pandas>=1.5.0
+numpy>=1.21.0
+scikit-learn>=1.2.0
+scipy>=1.9.0
+
+# Machine Learning Models
+xgboost>=1.6.0
+lightgbm>=3.3.0
+catboost>=1.1.0
+
+# AutoML Feature Engineering
+auto-sklearn>=0.15.0
+
+# Data Visualization
+matplotlib>=3.6.0
+seaborn>=0.11.0
+plotly>=5.10.0
+
+# Configuration and File Handling
+PyYAML>=6.0
+openpyxl>=3.0.10  # For Excel files
+pyarrow>=10.0.0   # For Parquet files
+
+# Progress and Logging
+tqdm>=4.64.0
+colorama>=0.4.5
+
+# Statistical Analysis
+statsmodels>=0.13.0
+
+# Hyperparameter Optimization
+optuna>=3.0.0
+scikit-optimize>=0.9.0
+
+# Model Serialization
+joblib>=1.2.0
+pickle5>=0.0.12
+
+# API Framework (for future Phase 2)
+fastapi>=0.85.0
+uvicorn>=0.18.0
+pydantic>=1.10.0
+
+# Testing
+pytest>=7.0.0
+pytest-cov>=4.0.0
+
+# Development Tools
+black>=22.0.0
+flake8>=5.0.0
+isort>=5.10.0
+
+# Jupyter (for development notebooks)
+jupyter>=1.0.0
+ipywidgets>=8.0.0
+
+# Memory optimization
+memory-profiler>=0.60.0
+psutil>=5.9.0
+
+# Data quality checks
+pandas-profiling>=3.3.0
+great-expectations>=0.15.0
+
+# Feature selection and engineering
+feature-engine>=1.4.0
+category-encoders>=2.5.0
+
+# Model interpretation
+shap>=0.41.0
+lime>=0.2.0
+
+# Time series (for future phases)
+# prophet>=1.1.0
+# pmdarima>=2.0.0
+
+# Text processing (for future phases)
+# nltk>=3.7.0
+# spacy>=3.4.0
+# transformers>=4.21.0
+
+# Database connectivity (for future phases)
+# sqlalchemy>=1.4.0
+# psycopg2-binary>=2.9.0
+# pymongo>=4.2.0
