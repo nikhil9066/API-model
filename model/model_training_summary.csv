@@ -34,3 +34,5 @@ timestamp,n_samples,n_features,numeric_features,categorical_features,high_corr_p
 2025-05-07 00:25:42,466,11,12,0,5,0.013,0.203,2607.591,-0.118,regression,Gradient Boosting,Random Forest,Linear Regression,Ridge Regression,Lasso Regression,ElasticNet Regression
 2025-05-07 00:26:56,506,12,13,0,1,0.138,1.108,2499.884,1.495,regression,Gradient Boosting,Random Forest,Decision Tree,Ridge Regression,ElasticNet Regression,Random Forest
 2025-05-07 00:26:58,466,11,12,0,5,0.013,0.203,2607.591,-0.118,regression,Gradient Boosting,Random Forest,Linear Regression,Ridge Regression,Lasso Regression,ElasticNet Regression
+2025-08-15 23:58:25,506,12,13,0,1,0.138,0.906,2502.683,0.493,regression,Random Forest,Gradient Boosting,Ridge Regression,Ridge Regression,Linear Regression,ElasticNet Regression
+2025-08-15 23:58:26,494,10,11,0,5,0.02,0.605,2837.141,-0.541,regression,Gradient Boosting,Random Forest,Linear Regression,Ridge Regression,Lasso Regression,ElasticNet Regression
