@@ -1,0 +1,159 @@
+{
+  "job_id": "job_20250818_233035",
+  "timestamp": "2025-08-18T23:30:35.347730",
+  "dataset_name": "crazy_numerical_dataset.csv",
+  "target_variable": "house_price",
+  "mode": "auto",
+  "status": "completed",
+  "config_used": {
+    "name": "Phase1_Numeric_AutoML",
+    "version": "1.0.0",
+    "data_type": "numeric_only",
+    "validation": {
+      "max_size_gb": 3.0,
+      "min_rows": 50,
+      "min_features": 2,
+      "max_features": 1000,
+      "missing_threshold": 0.5
+    },
+    "preprocessing": {
+      "outlier_detection": {
+        "methods": [
+          "iqr",
+          "sd3",
+          "percentile"
+        ],
+        "auto_select": true,
+        "iqr_multiplier": 1.5,
+        "std_multiplier": 3.0,
+        "percentile_bounds": [
+          0.01,
+          0.99
+        ]
+      },
+      "correlation": {
+        "high_threshold": 0.9,
+        "low_threshold": 0.1,
+        "method": "pearson"
+      },
+      "skewness": {
+        "high_threshold": 1.0,
+        "moderate_threshold": 0.5,
+        "transformation_methods": [
+          "log",
+          "sqrt",
+          "boxcox",
+          "yeo-johnson"
+        ]
+      },
+      "scaling": {
+        "method": "standard",
+        "apply_after_feature_engineering": true
+      }
+    },
+    "feature_engineering": {
+      "enabled": true,
+      "auto_sklearn": {
+        "enabled": true,
+        "time_budget": 300,
+        "memory_limit": 2048,
+        "include_preprocessors": [
+          "polynomial",
+          "select_percentile"
+        ]
+      },
+      "polynomial_features": {
+        "enabled": true,
+        "max_degree": 3,
+        "interaction_only": false,
+        "include_bias": false
+      },
+      "interaction_features": {
+        "enabled": true,
+        "max_interactions": 2
+      },
+      "statistical_features": {
+        "enabled": true,
+        "include_ratios": true,
+        "include_differences": true
+      },
+      "feature_selection": {
+        "enabled": true,
+        "method": "auto",
+        "k_best": 20
+      }
+    },
+    "modeling": {
+      "suggestion_mode": true,
+      "top_k_models": 3,
+      "run_all_option": true,
+      "available_models": {
+        "linear": [
+          "linear_regression",
+          "ridge",
+          "lasso",
+          "elastic_net",
+          "bayesian_ridge"
+        ],
+        "tree_based": [
+          "decision_tree",
+          "random_forest",
+          "extra_trees",
+          "gradient_boosting",
+          "xgboost",
+          "lightgbm"
+        ],
+        "other": [
+          "svr",
+          "knn",
+          "neural_network",
+          "gaussian_process"
+        ]
+      },
+      "hyperparameter_tuning": {
+        "enabled": true,
+        "method": "random_search",
+        "cv_folds": 3,
+        "n_iter": 50,
+        "scoring": "r2",
+        "n_jobs": -1,
+        "timeout_per_model": 600
+      },
+      "evaluation": {
+        "test_size": 0.2,
+        "cv_folds": 5,
+        "random_state": 42,
+        "scoring_metrics": {
+          "primary": "r2",
+          "additional": [
+            "mae",
+            "mse",
+            "rmse"
+          ]
+        }
+      }
+    },
+    "progress": {
+      "console_output": true,
+      "log_to_file": true,
+      "detailed_steps": true,
+      "eta_calculation": true
+    },
+    "storage": {
+      "base_path": "storage",
+      "models_path": "storage/models/jobs",
+      "results_path": "storage/results",
+      "cache_path": "storage/cache",
+      "cleanup_old_jobs": true,
+      "max_jobs_to_keep": 50
+    },
+    "logging": {
+      "level": "INFO",
+      "console_level": "INFO",
+      "file_level": "DEBUG",
+      "log_dir": "logs",
+      "max_file_size_mb": 10,
+      "backup_count": 5
+    }
+  }
+}

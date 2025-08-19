@@ -1,88 +1,196 @@
 # Phase 1 AutoML Pipeline Requirements
+# Updated with all dependencies including missing YAML support
 
-# Core Data Science Libraries
+# ========================================
+# CORE DATA SCIENCE LIBRARIES (REQUIRED)
+# ========================================
 pandas>=1.5.0
 numpy>=1.21.0
 scikit-learn>=1.2.0
 scipy>=1.9.0
 
-# Machine Learning Models
-xgboost>=1.6.0
-lightgbm>=3.3.0
-catboost>=1.1.0
+# ========================================
+# CONFIGURATION & FILE HANDLING (REQUIRED)
+# ========================================
+PyYAML>=6.0                    # YAML configuration files
+pyyaml>=6.0                    # Alternative package name for compatibility
+ruamel.yaml>=0.17.0            # Advanced YAML processing
+openpyxl>=3.0.10               # Excel file support (.xlsx)
+xlrd>=2.0.0                    # Excel file support (.xls)
+pyarrow>=10.0.0                # Parquet file support
 
-# AutoML Feature Engineering
-auto-sklearn>=0.15.0
+# ========================================
+# MACHINE LEARNING MODELS (OPTIONAL)
+# ========================================
+# Note: These may require additional system dependencies
+xgboost>=1.6.0                 # Gradient boosting (needs libomp on macOS)
+lightgbm>=3.3.0               # Microsoft's gradient boosting
+catboost>=1.1.0                # Yandex's gradient boosting
 
-# Data Visualization
+# ========================================
+# AUTOML & FEATURE ENGINEERING (OPTIONAL)
+# ========================================
+# auto-sklearn>=0.15.0          # Commented out - complex dependencies
+feature-engine>=1.4.0          # Feature engineering toolkit
+category-encoders>=2.5.0       # Categorical encoding
+
+# ========================================
+# DATA VISUALIZATION (REQUIRED)
+# ========================================
 matplotlib>=3.6.0
 seaborn>=0.11.0
 plotly>=5.10.0
 
-# Configuration and File Handling
-PyYAML>=6.0
-openpyxl>=3.0.10  # For Excel files
-pyarrow>=10.0.0   # For Parquet files
-
-# Progress and Logging
+# ========================================
+# PROGRESS & LOGGING (REQUIRED)
+# ========================================
 tqdm>=4.64.0
 colorama>=0.4.5
 
-# Statistical Analysis
+# ========================================
+# STATISTICAL ANALYSIS (OPTIONAL)
+# ========================================
 statsmodels>=0.13.0
 
-# Hyperparameter Optimization
+# ========================================
+# HYPERPARAMETER OPTIMIZATION (OPTIONAL)
+# ========================================
 optuna>=3.0.0
 scikit-optimize>=0.9.0
 
-# Model Serialization
+# ========================================
+# MODEL SERIALIZATION (REQUIRED)
+# ========================================
 joblib>=1.2.0
-pickle5>=0.0.12
+# pickle5>=0.0.12              # Not needed for Python 3.8+
 
-# API Framework (for future Phase 2)
+# ========================================
+# API FRAMEWORK (FUTURE PHASE 2)
+# ========================================
 fastapi>=0.85.0
 uvicorn>=0.18.0
 pydantic>=1.10.0
 
-# Testing
+# ========================================
+# DEEP LEARNING (OPTIONAL)
+# ========================================
+tensorflow>=2.10.0            # Deep learning framework
+# torch>=1.12.0                # Alternative to TensorFlow
+scikeras>=0.9.0                # Keras wrapper for scikit-learn
+
+# ========================================
+# TESTING (DEVELOPMENT)
+# ========================================
 pytest>=7.0.0
 pytest-cov>=4.0.0
 
-# Development Tools
+# ========================================
+# CODE QUALITY (DEVELOPMENT)
+# ========================================
 black>=22.0.0
 flake8>=5.0.0
 isort>=5.10.0
 
-# Jupyter (for development notebooks)
+# ========================================
+# JUPYTER NOTEBOOKS (DEVELOPMENT)
+# ========================================
 jupyter>=1.0.0
 ipywidgets>=8.0.0
+notebook>=6.4.0
 
-# Memory optimization
+# ========================================
+# SYSTEM & MEMORY MONITORING (OPTIONAL)
+# ========================================
 memory-profiler>=0.60.0
 psutil>=5.9.0
 
-# Data quality checks
-pandas-profiling>=3.3.0
+# ========================================
+# DATA QUALITY & PROFILING (OPTIONAL)
+# ========================================
+pandas-profiling>=3.6.0       # Now called ydata-profiling
+ydata-profiling>=4.0.0         # Updated package name
 great-expectations>=0.15.0
 
-# Feature selection and engineering
-feature-engine>=1.4.0
-category-encoders>=2.5.0
+# ========================================
+# MODEL INTERPRETATION (OPTIONAL)
+# ========================================
+shap>=0.41.0                   # SHAP values for model explainability
+lime>=0.2.0                    # LIME for local interpretability
 
-# Model interpretation
-shap>=0.41.0
-lime>=0.2.0
+# ========================================
+# ADDITIONAL UTILITIES
+# ========================================
+pathlib2>=2.3.0               # Enhanced path handling (if needed)
+python-dateutil>=2.8.0        # Date utilities
+requests>=2.28.0              # HTTP requests
 
-# Time series (for future phases)
+# ========================================
+# FUTURE PHASES (COMMENTED OUT)
+# ========================================
+
+# ========================================
+# Time Series Analysis
+# ========================================
 # prophet>=1.1.0
 # pmdarima>=2.0.0
+# sktime>=0.13.0
 
-# Text processing (for future phases)
+# ========================================
+# Natural Language Processing
+# ========================================
 # nltk>=3.7.0
 # spacy>=3.4.0
 # transformers>=4.21.0
+# sentence-transformers>=2.2.0
 
-# Database connectivity (for future phases)
+# ========================================
+# Computer Vision
+# ========================================
+# opencv-python>=4.6.0
+# pillow>=9.2.0
+
+# ========================================
+# Database Connectivity
+# ========================================
 # sqlalchemy>=1.4.0
-# psycopg2-binary>=2.9.0
-# pymongo>=4.2.0
+# psycopg2-binary>=2.9.0       # PostgreSQL
+# pymongo>=4.2.0               # MongoDB
+# mysql-connector-python>=8.0.0 # MySQL
+
+# ========================================
+# Big Data Processing
+# ========================================
+# dask>=2022.8.0
+# vaex>=4.13.0
+# polars>=0.14.0
+
+# ========================================
+# Distributed Computing
+# ========================================
+# ray>=2.0.0
+# rapids-cudf>=22.08.0          # GPU acceleration
+
+# ========================================
+# INSTALLATION NOTES
+# ========================================
+
+# ========================================
+# macOS Users (for XGBoost):
+# ========================================
+# brew install libomp
+
+# Linux Users:
+# sudo apt-get install libgomp1
+
+# Windows Users:
+# Most packages should install without issues
+
+# For minimal installation (core functionality only):
+# pip install pandas numpy scikit-learn matplotlib seaborn PyYAML
+
+# For full installation:
+# pip install -r requirements.txt
+
+# For development:
+# pip install -r requirements.txt
+# pip install -e .

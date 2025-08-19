@@ -1,0 +1,15 @@
+{
+  "job_id": "job_20250818_233035",
+  "dataset_name": "crazy_numerical_dataset.csv",
+  "target_variable": "house_price",
+  "mode": "auto",
+  "original_features": 49,
+  "final_features": 20,
+  "outliers_removed": 70,
+  "features_removed": 9,
+  "models_trained": 8,
+  "best_model": "Ridge",
+  "best_score": 0.6661958771812948,
+  "total_training_time": 2.35270619392395,
+  "visualizations_created": true
+}

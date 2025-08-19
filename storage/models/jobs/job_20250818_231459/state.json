@@ -1,0 +1,798 @@
+{
+  "job_info": {
+    "job_id": "job_20250818_231459",
+    "timestamp": "2025-08-18T23:14:59.026370",
+    "dataset_name": "crazy_numerical_dataset.csv",
+    "target_variable": "student_grade",
+    "mode": "auto",
+    "status": "running",
+    "config_used": {
+      "name": "Phase1_Numeric_AutoML",
+      "version": "1.0.0",
+      "data_type": "numeric_only",
+      "validation": {
+        "max_size_gb": 3.0,
+        "min_rows": 50,
+        "min_features": 2,
+        "max_features": 1000,
+        "missing_threshold": 0.5
+      },
+      "preprocessing": {
+        "outlier_detection": {
+          "methods": [
+            "iqr",
+            "sd3",
+            "percentile"
+          ],
+          "auto_select": true,
+          "iqr_multiplier": 1.5,
+          "std_multiplier": 3.0,
+          "percentile_bounds": [
+            0.01,
+            0.99
+          ]
+        },
+        "correlation": {
+          "high_threshold": 0.9,
+          "low_threshold": 0.1,
+          "method": "pearson"
+        },
+        "skewness": {
+          "high_threshold": 1.0,
+          "moderate_threshold": 0.5,
+          "transformation_methods": [
+            "log",
+            "sqrt",
+            "boxcox",
+            "yeo-johnson"
+          ]
+        },
+        "scaling": {
+          "method": "standard",
+          "apply_after_feature_engineering": true
+        }
+      },
+      "feature_engineering": {
+        "enabled": true,
+        "auto_sklearn": {
+          "enabled": true,
+          "time_budget": 300,
+          "memory_limit": 2048,
+          "include_preprocessors": [
+            "polynomial",
+            "select_percentile"
+          ]
+        },
+        "polynomial_features": {
+          "enabled": true,
+          "max_degree": 3,
+          "interaction_only": false,
+          "include_bias": false
+        },
+        "interaction_features": {
+          "enabled": true,
+          "max_interactions": 2
+        },
+        "statistical_features": {
+          "enabled": true,
+          "include_ratios": true,
+          "include_differences": true
+        },
+        "feature_selection": {
+          "enabled": true,
+          "method": "auto",
+          "k_best": 20
+        }
+      },
+      "modeling": {
+        "suggestion_mode": true,
+        "top_k_models": 3,
+        "run_all_option": true,
+        "available_models": {
+          "linear": [
+            "linear_regression",
+            "ridge",
+            "lasso",
+            "elastic_net",
+            "bayesian_ridge"
+          ],
+          "tree_based": [
+            "decision_tree",
+            "random_forest",
+            "extra_trees",
+            "gradient_boosting",
+            "xgboost",
+            "lightgbm"
+          ],
+          "other": [
+            "svr",
+            "knn",
+            "neural_network",
+            "gaussian_process"
+          ]
+        },
+        "hyperparameter_tuning": {
+          "enabled": true,
+          "method": "random_search",
+          "cv_folds": 3,
+          "n_iter": 50,
+          "scoring": "r2",
+          "n_jobs": -1,
+          "timeout_per_model": 600
+        },
+        "evaluation": {
+          "test_size": 0.2,
+          "cv_folds": 5,
+          "random_state": 42,
+          "scoring_metrics": {
+            "primary": "r2",
+            "additional": [
+              "mae",
+              "mse",
+              "rmse"
+            ]
+          }
+        }
+      },
+      "progress": {
+        "console_output": true,
+        "log_to_file": true,
+        "detailed_steps": true,
+        "eta_calculation": true
+      },
+      "storage": {
+        "base_path": "storage",
+        "models_path": "storage/models/jobs",
+        "results_path": "storage/results",
+        "cache_path": "storage/cache",
+        "cleanup_old_jobs": true,
+        "max_jobs_to_keep": 50
+      },
+      "logging": {
+        "level": "INFO",
+        "console_level": "INFO",
+        "file_level": "DEBUG",
+        "log_dir": "logs",
+        "max_file_size_mb": 10,
+        "backup_count": 5
+      }
+    }
+  },
+  "dataset_profile": {
+    "num_rows": 510,
+    "num_cols": 50,
+    "file_size_mb": 0.28,
+    "memory_usage_mb": 0.19,
+    "column_types": {
+      "house_price": "float64",
+      "student_grade": "float64",
+      "customer_id": "float64",
+      "record_id": "float64",
+      "transaction_id": "float64",
+      "constant_column": "int64",
+      "constant_number": "int64",
+      "almost_constant": "int64",
+      "mostly_missing": "float64",
+      "extremely_missing": "float64",
+      "income_skewed": "float64",
+      "wealth_skewed": "float64",
+      "popularity_skewed": "float64",
+      "sales_moderate_skew": "float64",
+      "purchase_timestamp": "float64",
+      "purchase_year": "float64",
+      "purchase_month": "float64",
+      "purchase_day": "float64",
+      "purchase_weekday": "float64",
+      "category_code": "float64",
+      "product_type_code": "float64",
+      "is_premium": "float64",
+      "quality_level": "float64",
+      "base_metric": "float64",
+      "duplicate_metric_1": "float64",
+      "duplicate_metric_2": "float64",
+      "duplicate_metric_3": "float64",
+      "temperature_celsius": "float64",
+      "temperature_fahrenheit": "float64",
+      "length": "float64",
+      "width": "float64",
+      "price_per_unit": "float64",
+      "quantity": "float64",
+      "feature_with_outliers": "float64",
+      "positive_with_negative_outliers": "float64",
+      "x_linear": "float64",
+      "y_quadratic": "float64",
+      "z_cubic": "float64",
+      "score_or_category": "float64",
+      "tiny_feature": "float64",
+      "huge_feature": "float64",
+      "percentage": "float64",
+      "normalized": "float64",
+      "customer_age": "float64",
+      "annual_income": "float64",
+      "study_hours": "float64",
+      "iq_score": "float64",
+      "binary_like": "float64",
+      "weird_distribution": "float64",
+      "periodic_feature": "float64"
+    },
+    "missing_data": {
+      "house_price": 13.33,
+      "student_grade": 7.45,
+      "customer_id": 10.78,
+      "record_id": 14.9,
+      "transaction_id": 5.1,
+      "constant_column": 0.0,
+      "constant_number": 0.0,
+      "almost_constant": 0.0,
+      "mostly_missing": 79.8,
+      "extremely_missing": 94.9,
+      "income_skewed": 10.78,
+      "wealth_skewed": 8.24,
+      "popularity_skewed": 12.94,
+      "sales_moderate_skew": 9.02,
+      "purchase_timestamp": 14.9,
+      "purchase_year": 6.27,
+      "purchase_month": 14.31,
+      "purchase_day": 6.86,
+      "purchase_weekday": 5.29,
+      "category_code": 9.22,
+      "product_type_code": 10.0,
+      "is_premium": 13.14,
+      "quality_level": 11.57,
+      "base_metric": 14.71,
+      "duplicate_metric_1": 12.16,
+      "duplicate_metric_2": 7.06,
+      "duplicate_metric_3": 9.02,
+      "temperature_celsius": 15.1,
+      "temperature_fahrenheit": 14.31,
+      "length": 11.18,
+      "width": 11.57,
+      "price_per_unit": 6.47,
+      "quantity": 14.51,
+      "feature_with_outliers": 10.2,
+      "positive_with_negative_outliers": 11.57,
+      "x_linear": 8.24,
+      "y_quadratic": 11.76,
+      "z_cubic": 10.39,
+      "score_or_category": 6.67,
+      "tiny_feature": 11.57,
+      "huge_feature": 8.43,
+      "percentage": 12.55,
+      "normalized": 6.47,
+      "customer_age": 10.39,
+      "annual_income": 9.22,
+      "study_hours": 13.33,
+      "iq_score": 8.04,
+      "binary_like": 6.86,
+      "weird_distribution": 13.14,
+      "periodic_feature": 10.98
+    },
+    "numeric_summaries": {
+      "house_price": {
+        "mean": 206008.17339453546,
+        "std": 45828.822880649415,
+        "min": 96415.66502660754,
+        "max": 342143.4475585595,
+        "median": 206570.24477692758,
+        "skewness": 0.06417433466099537,
+        "unique_count": 432
+      },
+      "student_grade": {
+        "mean": 80.9722822340505,
+        "std": 19.23909227439043,
+        "min": 21.35122400337468,
+        "max": 100.0,
+        "median": 84.82071245338314,
+        "skewness": -0.6974188115150244,
+        "unique_count": 322
+      },
+      "customer_id": {
+        "mean": 100250.92527472528,
+        "std": 144.3103717361236,
+        "min": 100001.0,
+        "max": 100500.0,
+        "median": 100253.0,
+        "skewness": 0.004415865470732353,
+        "unique_count": 446
+      },
+      "record_id": {
+        "mean": 251.2073732718894,
+        "std": 146.8234657919916,
+        "min": 1.0,
+        "max": 500.0,
+        "median": 251.5,
+        "skewness": -0.003864238257054767,
+        "unique_count": 426
+      },
+      "transaction_id": {
+        "mean": 746411.6157024794,
+        "std": 144843.01775498054,
+        "min": 501224.0,
+        "max": 997479.0,
+        "median": 744879.0,
+        "skewness": -0.0005355359520291857,
+        "unique_count": 474
+      },
+      "constant_column": {
+        "mean": 42.0,
+        "std": 0.0,
+        "min": 42.0,
+        "max": 42.0,
+        "median": 42.0,
+        "skewness": 0.0,
+        "unique_count": 1
+      },
+      "constant_number": {
+        "mean": 999.0,
+        "std": 0.0,
+        "min": 999.0,
+        "max": 999.0,
+        "median": 999.0,
+        "skewness": 0.0,
+        "unique_count": 1
+      },
+      "almost_constant": {
+        "mean": 0.9901960784313726,
+        "std": 0.09862493091679987,
+        "min": 0.0,
+        "max": 1.0,
+        "median": 1.0,
+        "skewness": -9.97974811596322,
+        "unique_count": 2
+      },
+      "mostly_missing": {
+        "mean": 96.6146521812878,
+        "std": 19.655710397263878,
+        "min": 57.53516878878795,
+        "max": 138.10599269476307,
+        "median": 93.87923747328011,
+        "skewness": 0.07003548532388948,
+        "unique_count": 100
+      },
+      "extremely_missing": {
+        "mean": 47.93258560107304,
+        "std": 10.455747423294161,
+        "min": 30.803913679642807,
+        "max": 64.85012409886718,
+        "median": 48.24508822861341,
+        "skewness": -0.017125214021937216,
+        "unique_count": 25
+      },
+      "income_skewed": {
+        "mean": 49840.89950191056,
+        "std": 52674.88014804188,
+        "min": 106.6658666257351,
+        "max": 463038.04931820417,
+        "median": 33474.72296727736,
+        "skewness": 2.4590818672259562,
+        "unique_count": 446
+      },
+      "wealth_skewed": {
+        "mean": 162595.8231007167,
+        "std": 676358.4056028972,
+        "min": 152.60434023893075,
+        "max": 11325970.804671071,
+        "median": 18967.016204475498,
+        "skewness": 11.220632904492664,
+        "unique_count": 458
+      },
+      "popularity_skewed": {
+        "mean": 320888.05301960045,
+        "std": 2841848.4281471563,
+        "min": 8.028972846805704,
+        "max": 45366266.79273441,
+        "median": 3102.6163400826085,
+        "skewness": 12.724122722134398,
+        "unique_count": 436
+      },
+      "sales_moderate_skew": {
+        "mean": 3714.652288467538,
+        "std": 2360.145104755838,
+        "min": 148.45240981811037,
+        "max": 13055.430975817184,
+        "median": 3251.18951781367,
+        "skewness": 1.2249097840824035,
+        "unique_count": 454
+      },
+      "purchase_timestamp": {
+        "mean": 1638772200.0,
+        "std": 37544376.92698433,
+        "min": 1577941200.0,
+        "max": 1703998800.0,
+        "median": 1635566400.0,
+        "skewness": 0.09123961118861812,
+        "unique_count": 370
+      },
+      "purchase_year": {
+        "mean": 2021.4665271966528,
+        "std": 1.1354442375824585,
+        "min": 2020.0,
+        "max": 2023.0,
+        "median": 2021.0,
+        "skewness": 0.07445560067035516,
+        "unique_count": 4
+      },
+      "purchase_month": {
+        "mean": 6.226544622425629,
+        "std": 3.385266268978028,
+        "min": 1.0,
+        "max": 12.0,
+        "median": 6.0,
+        "skewness": 0.08006499545877474,
+        "unique_count": 12
+      },
+      "purchase_day": {
+        "mean": 16.48,
+        "std": 8.82394134886843,
+        "min": 1.0,
+        "max": 31.0,
+        "median": 17.0,
+        "skewness": -0.09382949454052031,
+        "unique_count": 31
+      },
+      "purchase_weekday": {
+        "mean": 2.9523809523809526,
+        "std": 2.0205914882672382,
+        "min": 0.0,
+        "max": 6.0,
+        "median": 3.0,
+        "skewness": 0.025804255436416013,
+        "unique_count": 7
+      },
+      "category_code": {
+        "mean": 50.861771058315334,
+        "std": 29.253155131852896,
+        "min": 1.0,
+        "max": 100.0,
+        "median": 50.0,
+        "skewness": -0.021843931644744484,
+        "unique_count": 100
+      },
+      "product_type_code": {
+        "mean": 3.7799564270152506,
+        "std": 1.9662965872013325,
+        "min": 1.0,
+        "max": 7.0,
+        "median": 4.0,
+        "skewness": 0.1588928805449316,
+        "unique_count": 7
+      },
+      "is_premium": {
+        "mean": 0.3002257336343115,
+        "std": 0.4588742309051256,
+        "min": 0.0,
+        "max": 1.0,
+        "median": 0.0,
+        "skewness": 0.8746635073100683,
+        "unique_count": 2
+      },
+      "quality_level": {
+        "mean": 2.731707317073171,
+        "std": 0.8975727582589412,
+        "min": 1.0,
+        "max": 4.0,
+        "median": 3.0,
+        "skewness": -0.16820772629951347,
+        "unique_count": 4
+      },
+      "base_metric": {
+        "mean": 1024.6363301028612,
+        "std": 208.77910229203636,
+        "min": 386.4123604089332,
+        "max": 1677.8598874484614,
+        "median": 1021.0677500895488,
+        "skewness": 0.05277564611662455,
+        "unique_count": 428
+      },
+      "duplicate_metric_1": {
+        "mean": 1024.4969974076234,
+        "std": 207.31516857662916,
+        "min": 517.7712359005536,
+        "max": 1686.800918006972,
+        "median": 1018.344735652222,
+        "skewness": 0.12370311611622559,
+        "unique_count": 439
+      },
+      "duplicate_metric_2": {
+        "mean": 1114.9619787884617,
+        "std": 233.2398265154056,
+        "min": 448.2346520196189,
+        "max": 1863.131094548994,
+        "median": 1103.149109863774,
+        "skewness": 0.13578586240328644,
+        "unique_count": 466
+      },
+      "duplicate_metric_3": {
+        "mean": 1072.0555222811013,
+        "std": 210.35171687594865,
+        "min": 431.4126584486158,
+        "max": 1705.183323022503,
+        "median": 1066.796526212047,
+        "skewness": 0.028212800685731513,
+        "unique_count": 454
+      },
+      "temperature_celsius": {
+        "mean": 19.52896178525403,
+        "std": 10.175616120765177,
+        "min": -16.771776823767752,
+        "max": 57.06768596003221,
+        "median": 19.71229171866081,
+        "skewness": 0.06820175443265383,
+        "unique_count": 428
+      },
+      "temperature_fahrenheit": {
+        "mean": 67.57323786077035,
+        "std": 17.99883745760801,
+        "min": 1.8108017172180448,
+        "max": 134.72183472805798,
+        "median": 67.49562724109921,
+        "skewness": 0.09935124372511588,
+        "unique_count": 429
+      },
+      "length": {
+        "mean": 10.020901940389766,
+        "std": 2.0504197985790213,
+        "min": 4.600152095901912,
+        "max": 15.789880968777751,
+        "median": 9.850373394247605,
+        "skewness": 0.12649650979239763,
+        "unique_count": 444
+      },
+      "width": {
+        "mean": 7.9917273032360665,
+        "std": 1.4764370139127603,
+        "min": 3.859153636282585,
+        "max": 13.4668628728592,
+        "median": 8.038843319733822,
+        "skewness": 0.006062918275269975,
+        "unique_count": 442
+      },
+      "price_per_unit": {
+        "mean": 49.617023601130846,
+        "std": 9.476375789972836,
+        "min": 22.76322216944216,
+        "max": 79.76041248346758,
+        "median": 49.09814730827287,
+        "skewness": 0.11326164630008172,
+        "unique_count": 469
+      },
+      "quantity": {
+        "mean": 49.63532110091743,
+        "std": 29.087699974073487,
+        "min": 1.0,
+        "max": 99.0,
+        "median": 50.0,
+        "skewness": 0.0009111179277962973,
+        "unique_count": 98
+      },
+      "feature_with_outliers": {
+        "mean": 118.17166677166894,
+        "std": 130.45067424488465,
+        "min": 36.399807409101754,
+        "max": 1129.6605335107315,
+        "median": 100.49544848301903,
+        "skewness": 6.4686429745312815,
+        "unique_count": 450
+      },
+      "positive_with_negative_outliers": {
+        "mean": 48.55283942222665,
+        "std": 19.14822417530265,
+        "min": -120.40172724398842,
+        "max": 85.7402091302639,
+        "median": 50.12099789732759,
+        "skewness": -5.885539598027278,
+        "unique_count": 442
+      },
+      "x_linear": {
+        "mean": 0.0744449912119421,
+        "std": 0.9640189986184298,
+        "min": -2.985922790249423,
+        "max": 2.834664325211945,
+        "median": 0.04569590817206135,
+        "skewness": 0.014373688226942781,
+        "unique_count": 459
+      },
+      "y_quadratic": {
+        "mean": 2.030744323681046,
+        "std": 4.0702392073389895,
+        "min": -2.653096590448963,
+        "max": 24.816636250362723,
+        "median": 0.5098500542157222,
+        "skewness": 1.99770293646033,
+        "unique_count": 441
+      },
+      "z_cubic": {
+        "mean": -1.6671438967661187,
+        "std": 4.763568615729184,
+        "min": -46.55801091559594,
+        "max": 9.28886355383881,
+        "median": -0.393452846679436,
+        "skewness": -4.100181854695009,
+        "unique_count": 448
+      },
+      "score_or_category": {
+        "mean": 38.563025210084035,
+        "std": 41.27318765809609,
+        "min": 1.0,
+        "max": 100.0,
+        "median": 10.0,
+        "skewness": 0.624044933048321,
+        "unique_count": 8
+      },
+      "tiny_feature": {
+        "mean": 0.0009998105495755364,
+        "std": 9.578560376269243e-05,
+        "min": 0.0006182386329219,
+        "max": 0.0012642593838414,
+        "median": 0.0010023304648285,
+        "skewness": -0.3264461318702653,
+        "unique_count": 442
+      },
+      "huge_feature": {
+        "mean": 1000312.5259931032,
+        "std": 102878.28630761962,
+        "min": 643357.4521739378,
+        "max": 1302450.9355959715,
+        "median": 998450.1521234496,
+        "skewness": -0.1283235246509647,
+        "unique_count": 457
+      },
+      "percentage": {
+        "mean": 51.541165682334515,
+        "std": 29.14496390061895,
+        "min": 0.0423682748320719,
+        "max": 99.93847766787329,
+        "median": 53.20740363643114,
+        "skewness": -0.06531165899980483,
+        "unique_count": 438
+      },
+      "normalized": {
+        "mean": 0.04176674904742386,
+        "std": 0.5796086525003135,
+        "min": -0.9932718890218548,
+        "max": 0.9954010592266164,
+        "median": 0.0612551979608972,
+        "skewness": -0.06391002143843844,
+        "unique_count": 467
+      },
+      "customer_age": {
+        "mean": 48.435448577680525,
+        "std": 17.28872120758248,
+        "min": 18.0,
+        "max": 79.0,
+        "median": 49.0,
+        "skewness": -0.030705912809827814,
+        "unique_count": 62
+      },
+      "annual_income": {
+        "mean": 68895.09796961257,
+        "std": 39706.53561493419,
+        "min": 16522.571513353858,
+        "max": 361739.0726151475,
+        "median": 60393.92167608305,
+        "skewness": 2.3757603498089197,
+        "unique_count": 455
+      },
+      "study_hours": {
+        "mean": 5.110179399755094,
+        "std": 1.9090955372802338,
+        "min": 0.0391061826299061,
+        "max": 9.420073160319308,
+        "median": 5.1590318418918155,
+        "skewness": -0.14101168415410084,
+        "unique_count": 434
+      },
+      "iq_score": {
+        "mean": 100.31312976486325,
+        "std": 15.143771330915623,
+        "min": 54.760152927604445,
+        "max": 144.38951886906466,
+        "median": 99.37272990976912,
+        "skewness": 0.09644833703045241,
+        "unique_count": 460
+      },
+      "binary_like": {
+        "mean": 0.05473684210526316,
+        "std": 0.22770568253604248,
+        "min": 0.0,
+        "max": 1.0,
+        "median": 0.0,
+        "skewness": 3.927402007700522,
+        "unique_count": 2
+      },
+      "weird_distribution": {
+        "mean": 16.91319733247739,
+        "std": 64.61816015569748,
+        "min": -61.83550563162396,
+        "max": 158.43740359512316,
+        "median": 0.0292008941992133,
+        "skewness": 0.4713635528647878,
+        "unique_count": 436
+      },
+      "periodic_feature": {
+        "mean": -0.007810159541102347,
+        "std": 0.704736075259794,
+        "min": -1.2482024209869689,
+        "max": 1.2136145384105896,
+        "median": -0.052338501350358446,
+        "skewness": -0.0027003423256208533,
+        "unique_count": 445
+      }
+    },
+    "categorical_summaries": {},
+    "constant_columns": [
+      "constant_column",
+      "constant_number"
+    ],
+    "high_cardinality_columns": [
+      "house_price",
+      "student_grade",
+      "customer_id",
+      "record_id",
+      "transaction_id",
+      "mostly_missing",
+      "income_skewed",
+      "wealth_skewed",
+      "popularity_skewed",
+      "sales_moderate_skew",
+      "purchase_timestamp",
+      "category_code",
+      "base_metric",
+      "duplicate_metric_1",
+      "duplicate_metric_2",
+      "duplicate_metric_3",
+      "temperature_celsius",
+      "temperature_fahrenheit",
+      "length",
+      "width",
+      "price_per_unit",
+      "quantity",
+      "feature_with_outliers",
+      "positive_with_negative_outliers",
+      "x_linear",
+      "y_quadratic",
+      "z_cubic",
+      "tiny_feature",
+      "huge_feature",
+      "percentage",
+      "normalized",
+      "customer_age",
+      "annual_income",
+      "study_hours",
+      "iq_score",
+      "weird_distribution",
+      "periodic_feature"
+    ],
+    "id_like_columns": [],
+    "correlation_issues": [
+      "customer_id <-> record_id: 1.000",
+      "customer_id <-> weird_distribution: 0.917",
+      "record_id <-> weird_distribution: 0.917",
+      "purchase_timestamp <-> purchase_year: 0.971",
+      "base_metric <-> duplicate_metric_1: 0.999",
+      "base_metric <-> duplicate_metric_2: 0.996",
+      "base_metric <-> duplicate_metric_3: 0.998",
+      "duplicate_metric_1 <-> duplicate_metric_2: 0.995",
+      "duplicate_metric_1 <-> duplicate_metric_3: 0.997",
+      "duplicate_metric_2 <-> duplicate_metric_3: 0.994",
+      "temperature_celsius <-> temperature_fahrenheit: 1.000"
+    ],
+    "outlier_candidates": [
+      "wealth_skewed: 13.5%",
+      "popularity_skewed: 14.7%",
+      "y_quadratic: 5.5%",
+      "z_cubic: 9.8%",
+      "binary_like: 5.1%"
+    ]
+  },
+  "pipeline_execution": {
+    "steps_completed": [],
+    "current_step": "initialized",
+    "progress_percentage": 0,
+    "start_time": "2025-08-18T23:14:59.027301",
+    "end_time": null,
+    "total_duration": null,
+    "errors": []
+  },
+  "preprocessing_results": {
+    "outliers_removed": 

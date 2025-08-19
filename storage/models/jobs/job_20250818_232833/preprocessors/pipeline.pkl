@@ -1,0 +1,24 @@
+{
+  "outliers_removed": 70,
+  "features_removed": [
+    "constant_column",
+    "constant_number",
+    "almost_constant",
+    "record_id",
+    "purchase_year",
+    "duplicate_metric_1",
+    "duplicate_metric_2",
+    "duplicate_metric_3",
+    "temperature_fahrenheit"
+  ],
+  "transformations_applied": [
+    "Removed 3 constant columns",
+    "Removed 70 outlier rows",
+    "Removed 6 highly correlated features",
+    "Handled missing values"
+  ],
+  "final_shape": [
+    440,
+    41
+  ]
+}
