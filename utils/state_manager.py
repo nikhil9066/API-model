@@ -71,6 +71,7 @@ class StateManager:
         }
         
         registry_path = os.path.join(self.base_path, 'models', 'registry.json')
+        os.makedirs(os.path.dirname(registry_path), exist_ok=True)
         with open(registry_path, 'w') as f:
             json.dump(registry, f, indent=2)
     
@@ -275,6 +276,58 @@ class StateManager:
             }
             self._save_job_state(job_id, state)
     
+    def save_training_summary(self, job_id: str, summary: Dict[str, Any]) -> bool:
+        """
+        Save training summary to job state and separate file
+        
+        Args:
+            job_id: Job identifier
+            summary: Training summary dictionary
+            
+        Returns:
+            bool: True if successful, False otherwise
+        """
+        try:
+            # Update job state with training summary
+            state = self.get_job_state(job_id)
+            if state:
+                # Store training summary in model_results
+                state['model_results']['training_summary'] = summary
+                
+                # Update model performance data
+                if 'model_performance_summary' in summary:
+                    for model_data in summary['model_performance_summary']:
+                        model_name = model_data['model_name']
+                        state['model_results']['all_models_performance'][model_name] = {
+                            'train_score': model_data.get('train_score', 0),
+                            'test_score': model_data.get('test_score', 0),
+                            'cv_score': model_data.get('cv_score', 0),
+                            'cv_std': model_data.get('cv_std', 0),
+                            'training_time': model_data.get('training_time', 0),
+                            'hyperparameters': model_data.get('hyperparameters', {})
+                        }
+                
+                # Update best model info
+                if 'best_model' in summary and summary['best_model']:
+                    state['model_results']['best_model'] = summary['best_model']
+                
+                # Save updated state
+                self._save_job_state(job_id, state)
+            
+            # Save training summary to separate file
+            job_path = self.get_job_path(job_id)
+            summary_path = os.path.join(job_path, 'training_summary.json')
+            
+            with open(summary_path, 'w') as f:
+                json.dump(summary, f, indent=2, default=str)
+            
+            self.logger.info(f"Training summary saved for job {job_id}")
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"Failed to save training summary for job {job_id}: {str(e)}")
+            return False
+    
     def get_job_state(self, job_id: str) -> Optional[Dict[str, Any]]:
         """Get current job state"""
         state_path = os.path.join(self.models_path, job_id, 'state.json')
@@ -287,7 +340,7 @@ class StateManager:
         """Save job state to file"""
         state_path = os.path.join(self.models_path, job_id, 'state.json')
         with open(state_path, 'w') as f:
-            json.dump(state, f, indent=2)
+            json.dump(state, f, indent=2, default=str)
     
     def get_job_path(self, job_id: str) -> str:
         """Get job directory path"""
@@ -297,7 +350,12 @@ class StateManager:
         """Get path for saving/loading a specific model"""
         job_path = self.get_job_path(job_id)
         model_dir = 'suggested_models' if is_suggested else 'all_models'
-        return os.path.join(job_path, model_dir, f"{model_name}.pkl")
+        model_path = os.path.join(job_path, model_dir, f"{model_name}.pkl")
+        
+        # Ensure directory exists
+        os.makedirs(os.path.dirname(model_path), exist_ok=True)
+        
+        return model_path
     
     def get_best_model_path(self, job_id: str) -> str:
         """Get path for the best model"""
@@ -305,7 +363,12 @@ class StateManager:
     
     def get_preprocessor_path(self, job_id: str) -> str:
         """Get path for the preprocessing pipeline"""
-        return os.path.join(self.get_job_path(job_id), 'preprocessors', 'pipeline.pkl')
+        preprocessor_path = os.path.join(self.get_job_path(job_id), 'preprocessors', 'pipeline.pkl')
+        
+        # Ensure directory exists
+        os.makedirs(os.path.dirname(preprocessor_path), exist_ok=True)
+        
+        return preprocessor_path
     
     def list_jobs(self, limit: int = 50) -> List[Dict]:
         """List recent jobs"""
@@ -320,9 +383,13 @@ class StateManager:
         for job_dir in job_dirs[:limit]:
             metadata_path = os.path.join(self.models_path, job_dir, 'metadata.json')
             if os.path.exists(metadata_path):
-                with open(metadata_path, 'r') as f:
-                    metadata = json.load(f)
-                jobs.append(metadata)
+                try:
+                    with open(metadata_path, 'r') as f:
+                        metadata = json.load(f)
+                    jobs.append(metadata)
+                except Exception as e:
+                    self.logger.warning(f"Could not load metadata for job {job_dir}: {e}")
+                    continue
         
         return jobs
     
@@ -353,8 +420,17 @@ class StateManager:
         """Update registry when a new job is created"""
         registry_path = os.path.join(self.base_path, 'models', 'registry.json')
         
-        with open(registry_path, 'r') as f:
-            registry = json.load(f)
+        # Ensure registry exists
+        if not os.path.exists(registry_path):
+            self._initialize_model_registry()
+        
+        try:
+            with open(registry_path, 'r') as f:
+                registry = json.load(f)
+        except:
+            self._initialize_model_registry()
+            with open(registry_path, 'r') as f:
+                registry = json.load(f)
         
         registry['jobs'][job_id] = {
             'metadata': asdict(metadata),
@@ -369,27 +445,93 @@ class StateManager:
         """Update registry when job status changes"""
         registry_path = os.path.join(self.base_path, 'models', 'registry.json')
         
-        with open(registry_path, 'r') as f:
-            registry = json.load(f)
+        if not os.path.exists(registry_path):
+            return
         
-        if job_id in registry['jobs']:
-            registry['jobs'][job_id]['metadata']['status'] = status
+        try:
+            with open(registry_path, 'r') as f:
+                registry = json.load(f)
             
-            if status == 'completed':
-                registry['statistics']['successful_jobs'] += 1
-            elif status == 'failed':
-                registry['statistics']['failed_jobs'] += 1
-        
-        with open(registry_path, 'w') as f:
-            json.dump(registry, f, indent=2)
+            if job_id in registry['jobs']:
+                registry['jobs'][job_id]['metadata']['status'] = status
+                
+                if status == 'completed':
+                    registry['statistics']['successful_jobs'] += 1
+                elif status == 'failed':
+                    registry['statistics']['failed_jobs'] += 1
+            
+            with open(registry_path, 'w') as f:
+                json.dump(registry, f, indent=2)
+                
+        except Exception as e:
+            self.logger.error(f"Failed to update registry for job {job_id}: {e}")
     
     def get_registry_stats(self) -> Dict[str, Any]:
         """Get registry statistics"""
         registry_path = os.path.join(self.base_path, 'models', 'registry.json')
         
         if os.path.exists(registry_path):
-            with open(registry_path, 'r') as f:
-                registry = json.load(f)
-            return registry.get('statistics', {})
+            try:
+                with open(registry_path, 'r') as f:
+                    registry = json.load(f)
+                return registry.get('statistics', {})
+            except:
+                pass
         
         return {}
+
+# Test function for StateManager
+def test_state_manager():
+    """Test StateManager functionality"""
+    
+    config = {
+        'storage': {
+            'base_path': 'test_storage',
+            'models_path': 'test_storage/models/jobs'
+        }
+    }
+    
+    # Test StateManager
+    state_manager = StateManager(config)
+    
+    print("Testing StateManager...")
+    
+    # Create a test job
+    job_id = state_manager.create_job("test_dataset.csv", "target_column", "auto")
+    print(f"✅ Created job: {job_id}")
+    
+    # Test save_training_summary
+    test_summary = {
+        'total_models_trained': 3,
+        'best_model': {
+            'name': 'RandomForest',
+            'test_score': 0.85
+        },
+        'model_performance_summary': [
+            {
+                'model_name': 'RandomForest',
+                'test_score': 0.85,
+                'train_score': 0.88
+            }
+        ]
+    }
+    
+    success = state_manager.save_training_summary(job_id, test_summary)
+    print(f"✅ Save training summary: {'Success' if success else 'Failed'}")
+    
+    # Test job state retrieval
+    state = state_manager.get_job_state(job_id)
+    if state:
+        print(f"✅ Job state retrieved successfully")
+        print(f"   Status: {state['job_info']['status']}")
+    
+    # Clean up test files
+    import shutil
+    try:
+        shutil.rmtree('test_storage')
+        print("✅ Cleaned up test files")
+    except:
+        pass
+
+if __name__ == "__main__":
+    test_state_manager()

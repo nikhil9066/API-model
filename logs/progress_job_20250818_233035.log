@@ -1,0 +1,69 @@
+2025-08-18 23:30:35 - INFO - 🚀 Starting: Data Validation & Profiling
+2025-08-18 23:30:35 - INFO -   🔸 Validating file format and size...
+2025-08-18 23:30:35 - INFO -   ✅ Validating file format and size (0.1s)
+2025-08-18 23:30:35 - INFO -   🔸 Loading dataset...
+2025-08-18 23:30:35 - INFO -   ✅ Loading dataset (0.0s)
+2025-08-18 23:30:35 - INFO -   🔸 Creating dataset profile...
+2025-08-18 23:30:35 - INFO -   ✅ Creating dataset profile (0.0s)
+2025-08-18 23:30:35 - INFO - ✅ Completed: Data Validation & Profiling (0.1s)
+2025-08-18 23:30:35 - INFO - 🚀 Starting: Data Preprocessing
+2025-08-18 23:30:35 - INFO - ✅ Completed: Data Preprocessing (0.0s)
+2025-08-18 23:30:35 - INFO - 🚀 Starting: Automated Feature Engineering
+2025-08-18 23:30:35 - INFO - 🚀 Starting: Automated Feature Engineering
+2025-08-18 23:30:35 - INFO -   🔸 Creating polynomial features...
+2025-08-18 23:30:35 - INFO -   ✅ Creating polynomial features (0.0s)
+2025-08-18 23:30:35 - INFO - ⚡ Automated Feature Engineering: Created 275 polynomial features
+2025-08-18 23:30:35 - INFO -   🔸 Creating interaction features...
+2025-08-18 23:30:35 - INFO -   ✅ Creating interaction features (0.0s)
+2025-08-18 23:30:35 - INFO - ⚡ Automated Feature Engineering: Created 21 interaction features
+2025-08-18 23:30:35 - INFO -   🔸 Selecting best features...
+2025-08-18 23:30:35 - INFO -   ✅ Selecting best features (0.0s)
+2025-08-18 23:30:35 - INFO - ⚡ Automated Feature Engineering: Selected 20 best features
+2025-08-18 23:30:35 - INFO - ✅ Completed: Automated Feature Engineering (0.0s)
+2025-08-18 23:30:35 - INFO - ✅ Completed: Automated Feature Engineering (0.0s)
+2025-08-18 23:30:35 - INFO - 🚀 Starting: Smart Model Selection & Training
+2025-08-18 23:30:35 - INFO -   🔸 Analyzing dataset characteristics...
+2025-08-18 23:30:35 - INFO -   🔸 Analyzing dataset characteristics...
+2025-08-18 23:30:35 - INFO -   ✅ Analyzing dataset characteristics (0.0s)
+2025-08-18 23:30:35 - INFO -   🔸 Generating model suggestions...
+2025-08-18 23:30:35 - INFO -   ✅ Generating model suggestions (0.0s)
+2025-08-18 23:30:35 - INFO -   ✅ Analyzing dataset characteristics (0.0s)
+2025-08-18 23:30:35 - INFO -   🔸 Generating model suggestions...
+2025-08-18 23:30:35 - INFO -   ✅ Generating model suggestions (0.0s)
+2025-08-18 23:30:35 - INFO -   🔸 Training selected models...
+2025-08-18 23:30:35 - INFO - 🚀 Starting: Training models
+2025-08-18 23:30:35 - INFO - ⚡ Training models: Training LinearRegression (1/8)
+2025-08-18 23:30:35 - INFO - ⚡ Training models: Training Ridge (2/8)
+2025-08-18 23:30:35 - INFO - ⚡ Training models: Training Lasso (3/8)
+2025-08-18 23:30:35 - INFO - ⚡ Training models: Training DecisionTree (4/8)
+2025-08-18 23:30:35 - INFO - ⚡ Training models: Training RandomForest (5/8)
+2025-08-18 23:30:36 - INFO - ⚡ Training models: Training GradientBoosting (6/8)
+2025-08-18 23:30:37 - INFO - ⚡ Training models: Training SVR (7/8)
+2025-08-18 23:30:37 - INFO - ⚡ Training models: Training KNeighbors (8/8)
+2025-08-18 23:30:37 - INFO - ✅ Completed: Training models (2.4s)
+2025-08-18 23:30:37 - INFO -   ✅ Training selected models (2.4s)
+2025-08-18 23:30:37 - INFO - ✅ Completed: Smart Model Selection & Training (2.4s)
+2025-08-18 23:30:37 - INFO - 🚀 Starting: Model Evaluation & Results
+2025-08-18 23:30:37 - INFO -   🔸 Evaluating model performance...
+2025-08-18 23:30:37 - INFO -   ✅ Evaluating model performance (0.0s)
+2025-08-18 23:30:37 - INFO -   🔸 Creating comparison visualizations...
+2025-08-18 23:30:39 - INFO -   ✅ Comparing model results (1.9s)
+2025-08-18 23:30:39 - INFO -   🔸 Saving models and results...
+2025-08-18 23:30:39 - INFO -   ✅ Saving models and results (0.0s)
+2025-08-18 23:30:39 - INFO - ✅ Completed: Model Evaluation & Results (1.9s)
+2025-08-18 23:30:39 - INFO - ✨ Pipeline completed in 4.4s
+2025-08-18 23:30:39 - INFO - 
+============================================================
+2025-08-18 23:30:39 - INFO - 📋 PIPELINE EXECUTION SUMMARY
+2025-08-18 23:30:39 - INFO - ============================================================
+2025-08-18 23:30:39 - INFO - Job ID: job_20250818_233035
+2025-08-18 23:30:39 - INFO - Total Duration: 4.4s
+2025-08-18 23:30:39 - INFO - 
+Step Breakdown:
+2025-08-18 23:30:39 - INFO -   ✅ Data Validation & Profiling: 0.1s
+2025-08-18 23:30:39 - INFO -   ✅ Data Preprocessing: 0.0s
+2025-08-18 23:30:39 - INFO -   ✅ Automated Feature Engineering: 0.0s
+2025-08-18 23:30:39 - INFO -   ✅ Smart Model Selection & Training: 2.4s
+2025-08-18 23:30:39 - INFO -   ✅ Model Evaluation & Results: 1.9s
+2025-08-18 23:30:39 - INFO -   ✅ Training models: 2.4s
+2025-08-18 23:30:39 - INFO - ============================================================

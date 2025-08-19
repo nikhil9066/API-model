@@ -1,0 +1,61 @@
+{
+  "total_models_trained": 8,
+  "best_model": {
+    "model_name": "Ridge",
+    "name": "Ridge",
+    "test_score": 0.6661958771812948,
+    "train_score": 0.6944927433659533,
+    "cv_score": 0.6598019001530883,
+    "training_time": 0.012645721435546875
+  },
+  "all_models_performance": {
+    "LinearRegression": {
+      "test_score": 0.6235608485229304,
+      "train_score": 0.6850547092578587,
+      "cv_score": -1.1811327567994383,
+      "training_time": 0.01737380027770996
+    },
+    "Ridge": {
+      "test_score": 0.6661958771812948,
+      "train_score": 0.6944927433659533,
+      "cv_score": 0.6598019001530883,
+      "training_time": 0.012645721435546875
+    },
+    "Lasso": {
+      "test_score": 0.6502789186905642,
+      "train_score": 0.7002286795495412,
+      "cv_score": 0.6495768302318246,
+      "training_time": 0.04877805709838867
+    },
+    "DecisionTree": {
+      "test_score": 0.34474656942919324,
+      "train_score": 0.969127498298273,
+      "cv_score": 0.3381287971224044,
+      "training_time": 0.029036760330200195
+    },
+    "RandomForest": {
+      "test_score": 0.6242640490341995,
+      "train_score": 0.9526557605162654,
+      "cv_score": 0.6259003442536656,
+      "training_time": 1.3848509788513184
+    },
+    "GradientBoosting": {
+      "test_score": 0.6149342377215096,
+      "train_score": 0.9137998518871259,
+      "cv_score": 0.6053719283259117,
+      "training_time": 0.7588269710540771
+    },
+    "SVR": {
+      "test_score": -0.0009193660832358397,
+      "train_score": 0.0005298020902396727,
+      "cv_score": -0.0018526537330708192,
+      "training_time": 0.03409886360168457
+    },
+    "KNeighbors": {
+      "test_score": 0.6019022316043026,
+      "train_score": 0.7398553597375173,
+      "cv_score": 0.6006502646239053,
+      "training_time": 0.06709504127502441
+    }
+  }
+}

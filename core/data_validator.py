@@ -1,440 +1,552 @@
 """
-utils/progress_tracker.py
-Comprehensive progress tracking system for Phase 1 AutoML Pipeline
+core/data_validator.py
+Comprehensive data validation for AutoML pipeline
 """
 
-import time
-import logging
-from typing import Dict, List, Optional, Callable, Any
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-import json
+import pandas as pd
+import numpy as np
 import os
+from pathlib import Path
+from typing import Dict, List, Tuple, Any, Optional, Union
+from dataclasses import dataclass
+import logging
+
+# Configure logger
+logger = logging.getLogger(__name__)
 
 @dataclass
-class ProgressStep:
-    """Individual progress step"""
-    name: str
-    description: str
-    weight: float  # Relative weight for progress calculation
-    status: str = "pending"  # pending, running, completed, failed
-    start_time: Optional[datetime] = None
-    end_time: Optional[datetime] = None
-    sub_steps: List['ProgressStep'] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    
-    @property
-    def duration(self) -> Optional[timedelta]:
-        if self.start_time and self.end_time:
-            return self.end_time - self.start_time
-        return None
-    
-    @property
-    def progress_percentage(self) -> float:
-        if self.status == "completed":
-            return 100.0
-        elif self.status == "failed":
-            return 0.0
-        elif self.status == "running":
-            if self.sub_steps:
-                completed_weight = sum(step.weight for step in self.sub_steps if step.status == "completed")
-                total_weight = sum(step.weight for step in self.sub_steps)
-                return (completed_weight / total_weight) * 100.0 if total_weight > 0 else 0.0
-            return 50.0  # Assume 50% if running without sub-steps
-        return 0.0  # pending
+class ValidationResult:
+    """Result of data validation"""
+    is_valid: bool
+    errors: List[str]
+    warnings: List[str]
+    suggestions: List[str]
+    dataset_profile: Dict[str, Any]
 
-class ProgressTracker:
-    """Comprehensive progress tracking with console and file logging"""
+@dataclass
+class DatasetProfile:
+    """Profile of a dataset"""
+    num_rows: int
+    num_cols: int
+    file_size_mb: float
+    memory_usage_mb: float
+    column_types: Dict[str, str]
+    missing_data: Dict[str, float]
+    numeric_summaries: Dict[str, Dict[str, float]]
+    categorical_summaries: Dict[str, Dict[str, Any]]
+    correlation_issues: List[str]
+    outlier_candidates: List[str]
+    constant_columns: List[str]
+    high_cardinality_columns: List[str]
+    id_like_columns: List[str]
+
+class DataValidator:
+    """
+    Comprehensive data validator for AutoML pipeline
+    Validates file format, data quality, and provides recommendations
+    """
     
-    def __init__(self, job_id: str, config: Dict, console_output: bool = True, log_to_file: bool = True):
-        self.job_id = job_id
+    def __init__(self, config: Dict[str, Any]):
+        """
+        Initialize validator with configuration
+        
+        Args:
+            config: Configuration dictionary with validation parameters
+        """
         self.config = config
-        self.console_output = console_output
-        self.log_to_file = log_to_file
+        self.max_file_size_mb = config.get('max_file_size_mb', 100)
+        self.supported_formats = config.get('supported_formats', ['.csv', '.xlsx', '.json'])
+        self.max_missing_percentage = config.get('max_missing_percentage', 50)
+        self.min_samples = config.get('min_samples', 10)
         
-        # Progress tracking
-        self.steps: List[ProgressStep] = []
-        self.current_step_index = 0
-        self.start_time = datetime.now()
-        self.end_time: Optional[datetime] = None
-        
-        # Logging setup
-        self.logger = self._setup_logging()
-        
-        # Progress callbacks
-        self.progress_callbacks: List[Callable] = []
-        
-        # Define pipeline steps for Phase 1
-        self._initialize_pipeline_steps()
+        logger.info(f"DataValidator initialized with config: {config}")
     
-    def _setup_logging(self) -> logging.Logger:
-        """Setup logging configuration"""
-        logger = logging.getLogger(f"progress_{self.job_id}")
-        logger.setLevel(logging.INFO)
+    def validate_file(self, file_path: str) -> ValidationResult:
+        """
+        Validate file and return comprehensive validation result
         
-        # Clear existing handlers
-        logger.handlers.clear()
-        
-        if self.log_to_file:
-            log_dir = self.config.get('logging', {}).get('log_dir', 'logs')
-            os.makedirs(log_dir, exist_ok=True)
+        Args:
+            file_path: Path to the file to validate
             
-            log_file = os.path.join(log_dir, f"progress_{self.job_id}.log")
-            file_handler = logging.FileHandler(log_file)
-            file_formatter = logging.Formatter(
-                '%(asctime)s - %(levelname)s - %(message)s',
-                datefmt='%Y-%m-%d %H:%M:%S'
-            )
-            file_handler.setFormatter(file_formatter)
-            logger.addHandler(file_handler)
+        Returns:
+            ValidationResult with validation status and details
+        """
+        errors = []
+        warnings = []
+        suggestions = []
         
-        return logger
-    
-    def _initialize_pipeline_steps(self):
-        """Initialize the standard Phase 1 pipeline steps"""
-        self.steps = [
-            ProgressStep(
-                name="data_validation",
-                description="Data Validation & Profiling",
-                weight=0.1,
-                sub_steps=[
-                    ProgressStep("file_validation", "Validating file format and size", 0.3),
-                    ProgressStep("data_loading", "Loading dataset", 0.2),
-                    ProgressStep("quality_check", "Checking data quality", 0.3),
-                    ProgressStep("profiling", "Creating dataset profile", 0.2)
-                ]
-            ),
-            ProgressStep(
-                name="preprocessing",
-                description="Data Preprocessing",
-                weight=0.25,
-                sub_steps=[
-                    ProgressStep("outlier_detection", "Detecting and removing outliers", 0.4),
-                    ProgressStep("correlation_analysis", "Analyzing feature correlations", 0.3),
-                    ProgressStep("skewness_handling", "Handling skewed features", 0.3)
-                ]
-            ),
-            ProgressStep(
-                name="feature_engineering",
-                description="Automated Feature Engineering",
-                weight=0.25,
-                sub_steps=[
-                    ProgressStep("auto_sklearn", "Auto-sklearn feature generation", 0.5),
-                    ProgressStep("polynomial_features", "Creating polynomial features", 0.2),
-                    ProgressStep("interaction_features", "Creating interaction features", 0.2),
-                    ProgressStep("feature_selection", "Selecting best features", 0.1)
-                ]
-            ),
-            ProgressStep(
-                name="model_selection",
-                description="Smart Model Selection & Training",
-                weight=0.3,
-                sub_steps=[
-                    ProgressStep("dataset_analysis", "Analyzing dataset characteristics", 0.1),
-                    ProgressStep("model_suggestions", "Generating model suggestions", 0.1),
-                    ProgressStep("model_training", "Training selected models", 0.6),
-                    ProgressStep("hyperparameter_tuning", "Hyperparameter optimization", 0.2)
-                ]
-            ),
-            ProgressStep(
-                name="evaluation",
-                description="Model Evaluation & Results",
-                weight=0.1,
-                sub_steps=[
-                    ProgressStep("performance_evaluation", "Evaluating model performance", 0.4),
-                    ProgressStep("model_comparison", "Comparing model results", 0.3),
-                    ProgressStep("result_saving", "Saving models and results", 0.3)
-                ]
-            )
-        ]
-    
-    def start_step(self, step_name: str, description: Optional[str] = None, metadata: Optional[Dict] = None):
-        """Start a pipeline step"""
-        step = self._find_step(step_name)
-        if not step:
-            # Create new step if not found
-            step = ProgressStep(step_name, description or step_name, 1.0)
-            self.steps.append(step)
-        
-        step.status = "running"
-        step.start_time = datetime.now()
-        if metadata:
-            step.metadata.update(metadata)
-        
-        self._log_progress(f"🚀 Starting: {step.description}")
-        self._update_progress()
-    
-    def complete_step(self, step_name: str, metadata: Optional[Dict] = None):
-        """Complete a pipeline step"""
-        step = self._find_step(step_name)
-        if step:
-            step.status = "completed"
-            step.end_time = datetime.now()
-            if metadata:
-                step.metadata.update(metadata)
+        try:
+            # Step 1: File existence and format validation
+            if not self._validate_file_existence(file_path):
+                errors.append(f"File not found: {file_path}")
+                return ValidationResult(
+                    is_valid=False,
+                    errors=errors,
+                    warnings=warnings,
+                    suggestions=suggestions,
+                    dataset_profile={}
+                )
             
-            duration = step.duration.total_seconds() if step.duration else 0
-            self._log_progress(f"✅ Completed: {step.description} ({duration:.1f}s)")
-            self._update_progress()
-    
-    def fail_step(self, step_name: str, error_message: str):
-        """Mark a step as failed"""
-        step = self._find_step(step_name)
-        if step:
-            step.status = "failed"
-            step.end_time = datetime.now()
-            step.metadata["error"] = error_message
+            # Step 2: File size validation
+            file_size_mb = self._get_file_size_mb(file_path)
+            if file_size_mb > self.max_file_size_mb:
+                warnings.append(f"Large file: {file_size_mb:.1f}MB (max recommended: {self.max_file_size_mb}MB)")
             
-            self._log_progress(f"❌ Failed: {step.description} - {error_message}")
-            self._update_progress()
-    
-    def update_step_progress(self, step_name: str, message: str, metadata: Optional[Dict] = None):
-        """Update progress within a running step"""
-        step = self._find_step(step_name)
-        if step and step.status == "running":
-            if metadata:
-                step.metadata.update(metadata)
+            # Step 3: File format validation
+            if not self._validate_file_format(file_path):
+                errors.append(f"Unsupported file format. Supported: {self.supported_formats}")
+                return ValidationResult(
+                    is_valid=False,
+                    errors=errors,
+                    warnings=warnings,
+                    suggestions=suggestions,
+                    dataset_profile={}
+                )
             
-            self._log_progress(f"⚡ {step.description}: {message}")
-    
-    def start_sub_step(self, parent_step: str, sub_step_name: str, description: str):
-        """Start a sub-step within a main step"""
-        parent = self._find_step(parent_step)
-        if parent:
-            sub_step = self._find_sub_step(parent, sub_step_name)
-            if sub_step:
-                sub_step.status = "running"
-                sub_step.start_time = datetime.now()
-                
-                self._log_progress(f"  🔸 {description}...")
-                self._update_progress()
-    
-    def complete_sub_step(self, parent_step: str, sub_step_name: str):
-        """Complete a sub-step"""
-        parent = self._find_step(parent_step)
-        if parent:
-            sub_step = self._find_sub_step(parent, sub_step_name)
-            if sub_step:
-                sub_step.status = "completed"
-                sub_step.end_time = datetime.now()
-                
-                duration = sub_step.duration.total_seconds() if sub_step.duration else 0
-                self._log_progress(f"  ✅ {sub_step.description} ({duration:.1f}s)")
-                self._update_progress()
-    
-    def get_overall_progress(self) -> float:
-        """Calculate overall pipeline progress percentage"""
-        if not self.steps:
-            return 0.0
-        
-        total_weight = sum(step.weight for step in self.steps)
-        completed_weight = 0.0
-        
-        for step in self.steps:
-            step_progress = step.progress_percentage / 100.0
-            completed_weight += step.weight * step_progress
-        
-        return (completed_weight / total_weight) * 100.0 if total_weight > 0 else 0.0
-    
-    def get_eta(self) -> Optional[str]:
-        """Estimate time remaining"""
-        progress = self.get_overall_progress()
-        if progress <= 0:
-            return None
-        
-        elapsed = datetime.now() - self.start_time
-        if progress >= 100:
-            return "Complete"
-        
-        estimated_total = elapsed.total_seconds() / (progress / 100.0)
-        remaining = estimated_total - elapsed.total_seconds()
-        
-        if remaining <= 0:
-            return "Almost done"
-        
-        return self._format_duration(remaining)
-    
-    def complete_pipeline(self):
-        """Mark the entire pipeline as complete"""
-        self.end_time = datetime.now()
-        total_duration = self.end_time - self.start_time
-        
-        self._log_progress(f"✨ Pipeline completed in {self._format_duration(total_duration.total_seconds())}")
-        
-        # Generate completion summary
-        self._generate_completion_summary()
-    
-    def add_progress_callback(self, callback: Callable):
-        """Add a callback function to be called on progress updates"""
-        self.progress_callbacks.append(callback)
-    
-    def _find_step(self, step_name: str) -> Optional[ProgressStep]:
-        """Find a step by name"""
-        for step in self.steps:
-            if step.name == step_name:
-                return step
-        return None
-    
-    def _find_sub_step(self, parent: ProgressStep, sub_step_name: str) -> Optional[ProgressStep]:
-        """Find a sub-step by name"""
-        for sub_step in parent.sub_steps:
-            if sub_step.name == sub_step_name:
-                return sub_step
-        return None
-    
-    def _log_progress(self, message: str):
-        """Log progress message to console and/or file"""
-        timestamp = datetime.now().strftime("%H:%M:%S")
-        
-        if self.console_output:
-            print(f"[{timestamp}] {message}")
-        
-        if self.log_to_file and self.logger:
-            self.logger.info(message)
-    
-    def _update_progress(self):
-        """Update progress and call callbacks"""
-        progress = self.get_overall_progress()
-        eta = self.get_eta()
-        
-        # Progress bar for console
-        if self.console_output:
-            self._display_progress_bar(progress, eta)
-        
-        # Call progress callbacks
-        for callback in self.progress_callbacks:
+            # Step 4: Load and validate data
             try:
-                callback({
-                    'job_id': self.job_id,
-                    'progress': progress,
-                    'eta': eta,
-                    'current_step': self._get_current_step_info(),
-                    'steps': self._serialize_steps()
-                })
+                df = self._load_dataframe(file_path)
             except Exception as e:
-                self.logger.error(f"Progress callback failed: {e}")
+                errors.append(f"Failed to load file: {str(e)}")
+                return ValidationResult(
+                    is_valid=False,
+                    errors=errors,
+                    warnings=warnings,
+                    suggestions=suggestions,
+                    dataset_profile={}
+                )
+            
+            # Step 5: Data quality validation
+            data_errors, data_warnings, data_suggestions = self._validate_data_quality(df)
+            errors.extend(data_errors)
+            warnings.extend(data_warnings)
+            suggestions.extend(data_suggestions)
+            
+            # Step 6: Create dataset profile
+            dataset_profile = self._create_dataset_profile(df, file_size_mb)
+            
+            # Determine if validation passed
+            is_valid = len(errors) == 0
+            
+            return ValidationResult(
+                is_valid=is_valid,
+                errors=errors,
+                warnings=warnings,
+                suggestions=suggestions,
+                dataset_profile=dataset_profile
+            )
+            
+        except Exception as e:
+            logger.error(f"Validation failed with error: {str(e)}")
+            errors.append(f"Validation failed: {str(e)}")
+            return ValidationResult(
+                is_valid=False,
+                errors=errors,
+                warnings=warnings,
+                suggestions=suggestions,
+                dataset_profile={}
+            )
     
-    def _display_progress_bar(self, progress: float, eta: Optional[str]):
-        """Display progress bar in console"""
-        bar_length = 30
-        filled_length = int(bar_length * progress / 100)
-        bar = '█' * filled_length + '░' * (bar_length - filled_length)
-        
-        eta_str = f" | ETA: {eta}" if eta else ""
-        print(f"\r📊 Progress: [{bar}] {progress:.1f}%{eta_str}", end='', flush=True)
-        
-        if progress >= 100:
-            print()  # New line when complete
+    def _validate_file_existence(self, file_path: str) -> bool:
+        """Check if file exists"""
+        return os.path.exists(file_path)
     
-    def _get_current_step_info(self) -> Dict:
-        """Get information about the current step"""
-        running_steps = [step for step in self.steps if step.status == "running"]
-        if running_steps:
-            step = running_steps[0]
-            return {
-                'name': step.name,
-                'description': step.description,
-                'progress': step.progress_percentage,
-                'metadata': step.metadata
-            }
-        return {}
+    def _get_file_size_mb(self, file_path: str) -> float:
+        """Get file size in MB"""
+        return os.path.getsize(file_path) / (1024 * 1024)
     
-    def _serialize_steps(self) -> List[Dict]:
-        """Serialize steps for JSON storage"""
-        return [
-            {
-                'name': step.name,
-                'description': step.description,
-                'status': step.status,
-                'progress': step.progress_percentage,
-                'start_time': step.start_time.isoformat() if step.start_time else None,
-                'end_time': step.end_time.isoformat() if step.end_time else None,
-                'duration': step.duration.total_seconds() if step.duration else None,
-                'metadata': step.metadata,
-                'sub_steps': [
-                    {
-                        'name': sub.name,
-                        'description': sub.description,
-                        'status': sub.status,
-                        'progress': sub.progress_percentage
-                    } for sub in step.sub_steps
-                ]
-            } for step in self.steps
-        ]
+    def _validate_file_format(self, file_path: str) -> bool:
+        """Validate file format"""
+        file_extension = Path(file_path).suffix.lower()
+        return file_extension in self.supported_formats
     
-    def _generate_completion_summary(self):
-        """Generate a summary of the completed pipeline"""
-        total_duration = self.end_time - self.start_time
+    def _load_dataframe(self, file_path: str) -> pd.DataFrame:
+        """
+        Load file into pandas DataFrame
         
-        summary = {
-            'job_id': self.job_id,
-            'total_duration': self._format_duration(total_duration.total_seconds()),
-            'start_time': self.start_time.isoformat(),
-            'end_time': self.end_time.isoformat(),
-            'steps_summary': []
-        }
+        Args:
+            file_path: Path to the file
+            
+        Returns:
+            pandas DataFrame
+        """
+        file_extension = Path(file_path).suffix.lower()
         
-        for step in self.steps:
-            step_summary = {
-                'name': step.name,
-                'description': step.description,
-                'status': step.status,
-                'duration': self._format_duration(step.duration.total_seconds()) if step.duration else "N/A"
-            }
-            summary['steps_summary'].append(step_summary)
-        
-        # Log summary
-        self._log_progress("\n" + "="*60)
-        self._log_progress("📋 PIPELINE EXECUTION SUMMARY")
-        self._log_progress("="*60)
-        self._log_progress(f"Job ID: {self.job_id}")
-        self._log_progress(f"Total Duration: {summary['total_duration']}")
-        self._log_progress("\nStep Breakdown:")
-        
-        for step_summary in summary['steps_summary']:
-            status_icon = "✅" if step_summary['status'] == "completed" else "❌" if step_summary['status'] == "failed" else "⏸️"
-            self._log_progress(f"  {status_icon} {step_summary['description']}: {step_summary['duration']}")
-        
-        self._log_progress("="*60)
-        
-        return summary
-    
-    def _format_duration(self, seconds: float) -> str:
-        """Format duration in human-readable format"""
-        if seconds < 60:
-            return f"{seconds:.1f}s"
-        elif seconds < 3600:
-            minutes = seconds // 60
-            secs = seconds % 60
-            return f"{int(minutes)}m {int(secs)}s"
+        if file_extension == '.csv':
+            # Try different encodings and separators
+            for encoding in ['utf-8', 'latin-1', 'cp1252']:
+                for sep in [',', ';', '\t', '|']:
+                    try:
+                        df = pd.read_csv(file_path, encoding=encoding, sep=sep)
+                        if len(df.columns) > 1:  # Valid if more than 1 column
+                            return df
+                    except Exception:
+                        continue
+            
+            # Fallback: try with default parameters
+            return pd.read_csv(file_path)
+            
+        elif file_extension == '.xlsx':
+            return pd.read_excel(file_path)
+            
+        elif file_extension == '.json':
+            return pd.read_json(file_path)
+            
         else:
-            hours = seconds // 3600
-            minutes = (seconds % 3600) // 60
-            return f"{int(hours)}h {int(minutes)}m"
+            raise ValueError(f"Unsupported file format: {file_extension}")
     
-    def save_progress_state(self, file_path: str):
-        """Save current progress state to file"""
-        state = {
-            'job_id': self.job_id,
-            'start_time': self.start_time.isoformat(),
-            'end_time': self.end_time.isoformat() if self.end_time else None,
-            'overall_progress': self.get_overall_progress(),
-            'steps': self._serialize_steps()
-        }
+    def _validate_data_quality(self, df: pd.DataFrame) -> Tuple[List[str], List[str], List[str]]:
+        """
+        Validate data quality and return errors, warnings, suggestions
         
-        with open(file_path, 'w') as f:
-            json.dump(state, f, indent=2)
+        Args:
+            df: DataFrame to validate
+            
+        Returns:
+            Tuple of (errors, warnings, suggestions)
+        """
+        errors = []
+        warnings = []
+        suggestions = []
+        
+        # Basic structure validation
+        if df.empty:
+            errors.append("Dataset is empty")
+            return errors, warnings, suggestions
+        
+        if len(df) < self.min_samples:
+            errors.append(f"Too few samples: {len(df)} (minimum: {self.min_samples})")
+        
+        if len(df.columns) < 2:
+            errors.append("Need at least 2 columns (features + target)")
+        
+        # Check for excessive missing data
+        missing_percentages = (df.isnull().sum() / len(df)) * 100
+        highly_missing = missing_percentages[missing_percentages > self.max_missing_percentage]
+        
+        if len(highly_missing) > 0:
+            warnings.append(f"Columns with >50% missing data: {list(highly_missing.index)}")
+        
+        # Check for constant columns
+        constant_columns = []
+        for col in df.columns:
+            if df[col].nunique() <= 1:
+                constant_columns.append(col)
+        
+        if constant_columns:
+            warnings.append(f"Constant columns detected: {constant_columns}")
+            suggestions.append("Consider removing constant columns as they provide no predictive value")
+        
+        # Check for potential ID columns
+        id_like_columns = []
+        for col in df.columns:
+            unique_ratio = df[col].nunique() / len(df)
+            if unique_ratio > 0.95 and len(df) > 20:  # >95% unique values
+                id_like_columns.append(col)
+        
+        if id_like_columns:
+            warnings.append(f"Potential ID columns detected: {id_like_columns}")
+            suggestions.append("ID columns should typically not be used as features or targets")
+        
+        # Check data types
+        non_numeric_cols = df.select_dtypes(exclude=[np.number]).columns.tolist()
+        if non_numeric_cols:
+            warnings.append(f"Non-numeric columns detected: {non_numeric_cols}")
+            suggestions.append("Phase 1 is optimized for numeric data. Consider using Phase 2 for mixed data types")
+        
+        # Check for highly skewed data
+        numeric_cols = df.select_dtypes(include=[np.number]).columns
+        highly_skewed = []
+        for col in numeric_cols:
+            try:
+                skewness = abs(df[col].skew())
+                if skewness > 2:  # Highly skewed
+                    highly_skewed.append(col)
+            except:
+                pass
+        
+        if highly_skewed:
+            warnings.append(f"Highly skewed columns: {highly_skewed}")
+            suggestions.append("Consider log transformation or other normalization techniques")
+        
+        # Check for potential outliers
+        outlier_cols = []
+        for col in numeric_cols:
+            try:
+                Q1 = df[col].quantile(0.25)
+                Q3 = df[col].quantile(0.75)
+                IQR = Q3 - Q1
+                lower_bound = Q1 - 1.5 * IQR
+                upper_bound = Q3 + 1.5 * IQR
+                outliers = df[(df[col] < lower_bound) | (df[col] > upper_bound)]
+                if len(outliers) > len(df) * 0.05:  # More than 5% outliers
+                    outlier_cols.append(col)
+            except:
+                pass
+        
+        if outlier_cols:
+            warnings.append(f"Columns with many outliers: {outlier_cols}")
+            suggestions.append("Outlier detection and removal may improve model performance")
+        
+        return errors, warnings, suggestions
     
-    def load_progress_state(self, file_path: str):
-        """Load progress state from file"""
-        with open(file_path, 'r') as f:
-            state = json.load(f)
+    def _create_dataset_profile(self, df: pd.DataFrame, file_size_mb: float) -> Dict[str, Any]:
+        """
+        Create comprehensive dataset profile
         
-        self.job_id = state['job_id']
-        self.start_time = datetime.fromisoformat(state['start_time'])
-        if state['end_time']:
-            self.end_time = datetime.fromisoformat(state['end_time'])
+        Args:
+            df: DataFrame to profile
+            file_size_mb: File size in MB
+            
+        Returns:
+            Dictionary with dataset profile information
+        """
+        try:
+            # Basic info
+            num_rows, num_cols = df.shape
+            memory_usage_mb = df.memory_usage(deep=True).sum() / (1024 * 1024)
+            
+            # Column types
+            column_types = {col: str(df[col].dtype) for col in df.columns}
+            
+            # Missing data analysis
+            missing_data = {}
+            for col in df.columns:
+                missing_pct = (df[col].isnull().sum() / len(df)) * 100
+                missing_data[col] = round(missing_pct, 2)
+            
+            # Numeric summaries
+            numeric_summaries = {}
+            numeric_cols = df.select_dtypes(include=[np.number]).columns
+            for col in numeric_cols:
+                try:
+                    numeric_summaries[col] = {
+                        'mean': float(df[col].mean()),
+                        'std': float(df[col].std()),
+                        'min': float(df[col].min()),
+                        'max': float(df[col].max()),
+                        'median': float(df[col].median()),
+                        'skewness': float(df[col].skew()),
+                        'unique_count': int(df[col].nunique())
+                    }
+                except:
+                    numeric_summaries[col] = {'error': 'Could not compute statistics'}
+            
+            # Categorical summaries
+            categorical_summaries = {}
+            categorical_cols = df.select_dtypes(include=['object', 'category']).columns
+            for col in categorical_cols:
+                try:
+                    value_counts = df[col].value_counts().head(10)
+                    categorical_summaries[col] = {
+                        'unique_count': int(df[col].nunique()),
+                        'most_frequent': value_counts.index[0] if len(value_counts) > 0 else None,
+                        'top_values': value_counts.to_dict()
+                    }
+                except:
+                    categorical_summaries[col] = {'error': 'Could not compute statistics'}
+            
+            # Identify problem columns
+            constant_columns = [col for col in df.columns if df[col].nunique() <= 1]
+            
+            high_cardinality_columns = [
+                col for col in df.columns 
+                if df[col].nunique() > min(50, len(df) * 0.1)
+            ]
+            
+            id_like_columns = [
+                col for col in df.columns 
+                if df[col].nunique() / len(df) > 0.95 and len(df) > 20
+            ]
+            
+            # Correlation issues (for numeric columns)
+            correlation_issues = []
+            if len(numeric_cols) > 1:
+                try:
+                    corr_matrix = df[numeric_cols].corr()
+                    for i in range(len(corr_matrix.columns)):
+                        for j in range(i+1, len(corr_matrix.columns)):
+                            corr_val = abs(corr_matrix.iloc[i, j])
+                            if corr_val > 0.9:  # Highly correlated
+                                col1, col2 = corr_matrix.columns[i], corr_matrix.columns[j]
+                                correlation_issues.append(f"{col1} <-> {col2}: {corr_val:.3f}")
+                except:
+                    pass
+            
+            # Outlier candidates
+            outlier_candidates = []
+            for col in numeric_cols:
+                try:
+                    Q1 = df[col].quantile(0.25)
+                    Q3 = df[col].quantile(0.75)
+                    IQR = Q3 - Q1
+                    lower_bound = Q1 - 1.5 * IQR
+                    upper_bound = Q3 + 1.5 * IQR
+                    outliers = df[(df[col] < lower_bound) | (df[col] > upper_bound)]
+                    outlier_pct = (len(outliers) / len(df)) * 100
+                    if outlier_pct > 5:  # More than 5% outliers
+                        outlier_candidates.append(f"{col}: {outlier_pct:.1f}%")
+                except:
+                    pass
+            
+            return {
+                'num_rows': num_rows,
+                'num_cols': num_cols,
+                'file_size_mb': round(file_size_mb, 2),
+                'memory_usage_mb': round(memory_usage_mb, 2),
+                'column_types': column_types,
+                'missing_data': missing_data,
+                'numeric_summaries': numeric_summaries,
+                'categorical_summaries': categorical_summaries,
+                'constant_columns': constant_columns,
+                'high_cardinality_columns': high_cardinality_columns,
+                'id_like_columns': id_like_columns,
+                'correlation_issues': correlation_issues,
+                'outlier_candidates': outlier_candidates
+            }
+            
+        except Exception as e:
+            logger.error(f"Failed to create dataset profile: {str(e)}")
+            return {
+                'error': f"Failed to create profile: {str(e)}",
+                'num_rows': len(df) if df is not None else 0,
+                'num_cols': len(df.columns) if df is not None else 0
+            }
+    
+    def validate_target_column(self, df: pd.DataFrame, target_column: str) -> Tuple[bool, List[str], List[str]]:
+        """
+        Validate if a column is suitable as a target variable
         
-        # Reconstruct steps from saved state
-        # This would need more complex logic for full restoration
-        pass
+        Args:
+            df: DataFrame containing the data
+            target_column: Name of the target column
+            
+        Returns:
+            Tuple of (is_valid, errors, warnings)
+        """
+        errors = []
+        warnings = []
+        
+        # Check if column exists
+        if target_column not in df.columns:
+            errors.append(f"Target column '{target_column}' not found in dataset")
+            return False, errors, warnings
+        
+        target_series = df[target_column]
+        
+        # Check for excessive missing values
+        missing_pct = (target_series.isnull().sum() / len(target_series)) * 100
+        if missing_pct > 50:
+            errors.append(f"Target column has {missing_pct:.1f}% missing values (too high)")
+        elif missing_pct > 20:
+            warnings.append(f"Target column has {missing_pct:.1f}% missing values")
+        
+        # Check if column is constant
+        if target_series.nunique() <= 1:
+            errors.append("Target column has no variance (constant values)")
+            return False, errors, warnings
+        
+        # Check if it looks like an ID column
+        unique_ratio = target_series.nunique() / len(target_series)
+        if unique_ratio > 0.95 and len(target_series) > 20:
+            warnings.append("Target column appears to be an ID (too many unique values)")
+        
+        # Check data type
+        if not pd.api.types.is_numeric_dtype(target_series):
+            warnings.append("Target column is not numeric - Phase 1 is optimized for numeric targets")
+        
+        # Check for extreme values
+        if pd.api.types.is_numeric_dtype(target_series):
+            try:
+                Q1 = target_series.quantile(0.25)
+                Q3 = target_series.quantile(0.75)
+                IQR = Q3 - Q1
+                lower_bound = Q1 - 3 * IQR  # 3 IQR for extreme outliers
+                upper_bound = Q3 + 3 * IQR
+                extreme_outliers = target_series[(target_series < lower_bound) | (target_series > upper_bound)]
+                
+                if len(extreme_outliers) > 0:
+                    warnings.append(f"Target has {len(extreme_outliers)} extreme outliers")
+                
+                # Check skewness
+                skewness = abs(target_series.skew())
+                if skewness > 2:
+                    warnings.append(f"Target is highly skewed (skewness: {skewness:.2f})")
+                    
+            except:
+                pass
+        
+        is_valid = len(errors) == 0
+        return is_valid, errors, warnings
+
+# Example usage and testing
+def test_data_validator():
+    """Test the DataValidator with sample data"""
+    
+    # Create test configuration
+    config = {
+        'max_file_size_mb': 100,
+        'supported_formats': ['.csv', '.xlsx', '.json'],
+        'max_missing_percentage': 50,
+        'min_samples': 10
+    }
+    
+    # Initialize validator
+    validator = DataValidator(config)
+    
+    # Create sample test data
+    import tempfile
+    import os
+    
+    # Create a temporary CSV file for testing
+    test_data = {
+        'feature1': np.random.normal(0, 1, 100),
+        'feature2': np.random.exponential(2, 100),  # Skewed
+        'feature3': [1] * 100,  # Constant
+        'id_column': range(100),  # ID-like
+        'target': np.random.normal(10, 3, 100)
+    }
+    
+    # Add some missing values
+    test_data['feature1'][10:20] = np.nan
+    
+    df = pd.DataFrame(test_data)
+    
+    # Save to temporary file
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as f:
+        df.to_csv(f.name, index=False)
+        temp_file = f.name
+    
+    try:
+        # Test validation
+        result = validator.validate_file(temp_file)
+        
+        print("Validation Result:")
+        print(f"Valid: {result.is_valid}")
+        print(f"Errors: {result.errors}")
+        print(f"Warnings: {result.warnings}")
+        print(f"Suggestions: {result.suggestions}")
+        print(f"Dataset Profile Keys: {list(result.dataset_profile.keys())}")
+        
+        # Test target validation
+        if result.is_valid:
+            df_loaded = validator._load_dataframe(temp_file)
+            
+            # Test good target
+            valid, errors, warnings = validator.validate_target_column(df_loaded, 'target')
+            print(f"\nTarget 'target' validation: {valid}")
+            print(f"Errors: {errors}")
+            print(f"Warnings: {warnings}")
+            
+            # Test bad target (constant)
+            valid, errors, warnings = validator.validate_target_column(df_loaded, 'feature3')
+            print(f"\nTarget 'feature3' validation: {valid}")
+            print(f"Errors: {errors}")
+            print(f"Warnings: {warnings}")
+        
+    finally:
+        # Clean up
+        os.unlink(temp_file)
+
+if __name__ == "__main__":
+    test_data_validator()
