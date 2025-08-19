@@ -28,7 +28,8 @@ from core.inference import InferenceEngine
 from utils.progress_tracker import ProgressTracker
 from utils.state_manager import StateManager
 from utils.file_handler import FileHandler
-from utils.visualization import Visualizer
+from utils.visualization import Visualizer, ComprehensiveVisualizer
+from generate_report import AutoMLReportGenerator
 
 def setup_logging(config: Dict[str, Any]) -> logging.Logger:
     """Setup logging configuration"""
@@ -283,36 +284,153 @@ def run_pipeline(args):
         
         progress.complete_sub_step("evaluation", "performance_evaluation")
         
-        # Generate visualizations
-        progress.start_sub_step("evaluation", "model_comparison", "Creating comparison visualizations")
+        # # Generate visualizations
+        # progress.start_sub_step("evaluation", "model_comparison", "Creating comparison visualizations")
+        
+        # # Create visualization directory
+        # viz_dir = os.path.join(state_manager.get_job_path(job_id), 'visualizations')
+        # os.makedirs(viz_dir, exist_ok=True)
+        
+        # # Generate plots
+        # try:
+        #     # Model comparison plot
+        #     comp_plot_path = os.path.join(viz_dir, 'model_comparison.png')
+        #     visualizer.plot_model_comparison(comparison_df, comp_plot_path, 
+        #                                    f"Model Comparison - {job_id}")
+            
+        #     # Top models detailed plot
+        #     detailed_plot_path = os.path.join(viz_dir, 'top_models_detailed.png')
+        #     visualizer.plot_top_models_detailed(comparison_df, top_n=5, save_path=detailed_plot_path)
+            
+        #     # Performance summary
+        #     summary_plot_path = os.path.join(viz_dir, 'performance_summary.png')
+        #     visualizer.plot_performance_summary(comparison_df, best_model, summary_plot_path)
+            
+        #     # Results table
+        #     table_path = os.path.join(viz_dir, 'results_table.png')
+        #     visualizer.save_results_table(comparison_df, table_path)
+            
+        #     print(f"\n📈 Visualizations saved to: {viz_dir}")
+            
+        # except Exception as e:
+        #     logger.warning(f"Visualization generation failed: {str(e)}")
+        # Generate comprehensive visualizations
+        progress.start_sub_step("evaluation", "model_comparison", "Creating comprehensive visualizations")
         
         # Create visualization directory
         viz_dir = os.path.join(state_manager.get_job_path(job_id), 'visualizations')
         os.makedirs(viz_dir, exist_ok=True)
         
-        # Generate plots
+        # Create comprehensive analysis report
         try:
-            # Model comparison plot
-            comp_plot_path = os.path.join(viz_dir, 'model_comparison.png')
-            visualizer.plot_model_comparison(comparison_df, comp_plot_path, 
-                                           f"Model Comparison - {job_id}")
+            # Import the enhanced visualizer
+            # from utils.visualization import ComprehensiveVisualizer
             
-            # Top models detailed plot
-            detailed_plot_path = os.path.join(viz_dir, 'top_models_detailed.png')
-            visualizer.plot_top_models_detailed(comparison_df, top_n=5, save_path=detailed_plot_path)
+            # Initialize comprehensive visualizer
+            comprehensive_visualizer = ComprehensiveVisualizer(config['pipeline'])
             
-            # Performance summary
-            summary_plot_path = os.path.join(viz_dir, 'performance_summary.png')
-            visualizer.plot_performance_summary(comparison_df, best_model, summary_plot_path)
+            # Prepare comprehensive job state for analysis
+            comprehensive_job_state = {
+                'job_info': {
+                    'job_id': job_id,
+                    'dataset_name': dataset_name,
+                    'target_variable': target_variable,
+                    'mode': args.mode,
+                    'status': 'completed'
+                },
+                'dataset_profile': validation_result.dataset_profile,
+                'preprocessing_results': {
+                    'original_shape': (len(df), len(df.columns)),
+                    'final_shape': (len(fe_result.engineered_data), len(fe_result.feature_names)),
+                    'outliers_removed': preprocessing_result.outliers_removed,
+                    'features_removed': {
+                        'high_correlation': preprocessing_result.features_removed,
+                        'constant_features': getattr(preprocessing_result, 'constant_features_removed', []),
+                        'high_missing': getattr(preprocessing_result, 'high_missing_removed', [])
+                    },
+                    'transformations_applied': [
+                        'Missing value imputation',
+                        'Outlier removal',
+                        'Feature scaling',
+                        'Correlation removal'
+                    ],
+                    'processing_time': getattr(preprocessing_result, 'processing_time', 0)
+                },
+                'feature_engineering_results': {
+                    'original_features': list(df.columns),
+                    'engineered_features': fe_result.feature_names,
+                    'feature_importance': getattr(fe_result, 'feature_importance', {})
+                },
+                'model_results': {
+                    'all_models_performance': {
+                        row['Model']: {
+                            'train_score': row.get('Train Score', 0),
+                            'test_score': row.get('Test Score', 0),
+                            'cv_score': row.get('CV Score', 0),
+                            'cv_std': row.get('CV Std', 0),
+                            'training_time': row.get('Training Time', 0)
+                        }
+                        for _, row in comparison_df.iterrows()
+                    },
+                    'best_model': {
+                        'model_name': best_model.get('name', 'Unknown'),
+                        'test_score': best_model.get('test_score', 0),
+                        'train_score': best_model.get('train_score', 0),
+                        'cv_score': best_model.get('cv_score', 0),
+                        'training_time': best_model.get('training_time', 0)
+                    }
+                },
+                'original_data': df.copy()  # Include original data for analysis
+            }
             
-            # Results table
-            table_path = os.path.join(viz_dir, 'results_table.png')
-            visualizer.save_results_table(comparison_df, table_path)
+            # Create comprehensive analysis report
+            print(f"\n🎨 Creating comprehensive visualization suite...")
+            report_files = comprehensive_visualizer.create_complete_analysis_report(
+                comprehensive_job_state, viz_dir
+            )
             
-            print(f"\n📈 Visualizations saved to: {viz_dir}")
+            # Also create the basic plots for compatibility
+            if comparison_df is not None and not comparison_df.empty:
+                # Model comparison plot
+                comp_plot_path = os.path.join(viz_dir, 'model_comparison.png')
+                comprehensive_visualizer.plot_model_comparison(comparison_df, comp_plot_path, 
+                                               f"Model Comparison - {job_id}")
+                
+                # Results table
+                table_path = os.path.join(viz_dir, 'results_table.png')
+                comprehensive_visualizer.save_results_table(comparison_df, table_path)
+            
+            print(f"\n📈 Comprehensive visualizations created!")
+            print(f"   📊 Generated {len(report_files)} detailed analysis plots")
+            print(f"   📁 Saved to: {viz_dir}")
+            print(f"   🎯 Available plots:")
+            for plot_type, plot_path in report_files.items():
+                plot_name = plot_type.replace('_', ' ').title()
+                print(f"      • {plot_name}")
             
         except Exception as e:
-            logger.warning(f"Visualization generation failed: {str(e)}")
+            logger.warning(f"Comprehensive visualization generation failed: {str(e)}")
+            logger.debug(traceback.format_exc())
+            
+            # Fallback to basic visualizations
+            try:
+                print(f"\n📈 Falling back to basic visualizations...")
+                visualizer = Visualizer(config['pipeline'])
+                
+                # Model comparison plot
+                comp_plot_path = os.path.join(viz_dir, 'model_comparison.png')
+                visualizer.plot_model_comparison(comparison_df, comp_plot_path, 
+                                               f"Model Comparison - {job_id}")
+                
+                # Results table
+                table_path = os.path.join(viz_dir, 'results_table.png')
+                visualizer.save_results_table(comparison_df, table_path)
+                
+                print(f"📈 Basic visualizations saved to: {viz_dir}")
+                
+            except Exception as e2:
+                logger.error(f"All visualization attempts failed: {str(e2)}")
+                print(f"❌ Visualization generation failed, but models are saved successfully")
         
         progress.complete_sub_step("evaluation", "model_comparison")
         
@@ -360,6 +478,28 @@ def run_pipeline(args):
         print(f"📊 Models Trained: {len(comparison_df)}")
         print(f"🔍 Features: {len(df.columns)-1} → {len(fe_result.feature_names)}")
         print()
+
+        # Auto-generate comprehensive report
+        print("\n🎨 Generating comprehensive analysis report...")
+        try:
+            generator = AutoMLReportGenerator(job_id, config['pipeline'].get('storage_path', 'storage/models/jobs'))
+            report_path = generator.generate_report()
+            
+            if report_path:
+                print(f"📊 Comprehensive report generated: {report_path}")
+                
+                # Check if it's PDF or markdown
+                if str(report_path).endswith('.pdf'):
+                    print("🎊 PDF report ready! Perfect for stakeholder presentations.")
+                else:
+                    print("📝 Markdown report created (install pandoc/weasyprint for PDF)")
+                    
+        except Exception as e:
+            print(f"⚠️ Report generation encountered an issue: {str(e)}")
+            print(f"💡 You can generate the report manually: python main.py report --job {job_id}")
+        
+        # print("\n💡 Next Steps:")
+
         print("💡 Next Steps:")
         print(f"   • Use 'python main.py predict --model {job_id} --file new_data.csv' to make predictions")
         print(f"   • Check visualizations in: {viz_dir}")
@@ -733,6 +873,70 @@ def compare_models(args):
         print(f"\n🏆 Best Model: {best_model['model_name']}")
         print(f"   📊 Test Score: {best_model.get('test_score', 'N/A'):.4f}")
         print(f"   🎯 From: {'Suggestions' if best_model.get('is_suggested') else 'All Models'}")
+
+def generate_report_command(args):
+    """Generate comprehensive PDF report for a completed job"""
+    print("📊 Generating comprehensive AutoML report...")
+    
+    config = load_config(args.config)
+    state_manager = StateManager(config['pipeline'])
+    
+    # Validate job exists
+    job_state = state_manager.get_job_state(args.job)
+    if not job_state:
+        print(f"❌ Job not found: {args.job}")
+        sys.exit(1)
+    
+    # Check if job is completed
+    job_info = job_state.get('job_info', {})
+    if job_info.get('status') != 'completed':
+        print(f"⚠️ Warning: Job {args.job} status is '{job_info.get('status')}' (not completed)")
+        print("Report generation may be incomplete.")
+        
+        confirm = input("Continue anyway? [y/N]: ").strip().lower()
+        if confirm != 'y':
+            print("Report generation cancelled.")
+            sys.exit(0)
+    
+    try:
+        print(f"🎯 Generating report for job: {args.job}")
+        print(f"📂 Dataset: {job_info.get('dataset_name', 'N/A')}")
+        print(f"🎯 Target: {job_info.get('target_variable', 'N/A')}")
+        
+        # Initialize report generator
+        generator = AutoMLReportGenerator(args.job, config['pipeline'].get('storage_path', 'storage/models/jobs'))
+        
+        # Generate the report
+        report_path = generator.generate_report()
+        
+        if report_path:
+            print(f"\n✅ SUCCESS! Comprehensive report generated!")
+            print(f"📄 Report location: {report_path}")
+            print(f"📁 Job directory: {state_manager.get_job_path(args.job)}")
+            
+            # Check file size and provide appropriate message
+            if Path(report_path).exists():
+                file_size = Path(report_path).stat().st_size / (1024 * 1024)
+                print(f"📏 File size: {file_size:.1f} MB")
+                
+                if str(report_path).endswith('.pdf'):
+                    print("🎊 PDF report ready for sharing with stakeholders!")
+                else:
+                    print("📝 Markdown report generated (PDF conversion unavailable)")
+            
+            print(f"\n💡 Next steps:")
+            print(f"   • Open the report: {report_path}")
+            print(f"   • Share with your team and stakeholders")
+            print(f"   • Use insights for model deployment decisions")
+            
+        else:
+            print("❌ Report generation failed. Check the error messages above.")
+            sys.exit(1)
+            
+    except Exception as e:
+        print(f"❌ Report generation failed: {str(e)}")
+        print("Check that the job completed successfully and all required files exist.")
+        sys.exit(1)
 
 def main():
     """Main CLI entry point"""

@@ -178,6 +178,7 @@ requests>=2.28.0              # HTTP requests
 # macOS Users (for XGBoost):
 # ========================================
 # brew install libomp
+# brew install pandoc basictex
 
 # Linux Users:
 # sudo apt-get install libgomp1
